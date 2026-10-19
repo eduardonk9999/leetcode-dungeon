@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Masmorra do Algoritmo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: palco pixelado no topo; pergaminho da missão e grimório (editor) lado a lado no desktop, empilhados no celular. Tema único escuro, de propósito: é uma masmorra. */
+:root{
+  --bg:#14111d; --panel:#1e1a2c; --panel-2:#282239; --line:#3d3459; --fg:#ede3cf; --muted:#a397bd;
+  --torch:#f0a23b; --torch-deep:#a85a17; --ok:#74d17f; --bad:#ec5d50; --code-bg:#0e0b16;
+  --f-display:"Silkscreen","Courier New",monospace;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-code:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --px:4px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--torch);outline-offset:3px}
+code{font-family:var(--f-code);font-size:.88em;background:var(--panel-2);padding:1px 5px;color:#ffd9a0}
+.wrap{max-width:1180px;margin:0 auto}
+
+/* pixel border */
+.pix{box-shadow:0 calc(-1*var(--px)) 0 0 var(--line),0 var(--px) 0 0 var(--line),calc(-1*var(--px)) 0 0 0 var(--line),var(--px) 0 0 0 var(--line)}
+
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:12px;padding-block:12px;border-bottom:2px solid var(--line);flex-wrap:wrap}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.brand{font-family:var(--f-display);font-size:15px;letter-spacing:.04em;color:var(--torch);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:flex;align-items:center;gap:14px;font-family:var(--f-display);font-size:13px}
+.hearts{display:flex;gap:3px;color:var(--bad)}
+.hearts svg{width:21px;height:18px;shape-rendering:crispEdges}
+.hearts .empty{color:var(--line)}
+.stars-total{color:var(--torch);font-variant-numeric:tabular-nums}
+.btn-ghost{background:none;border:2px solid var(--line);padding:6px 10px;font-family:var(--f-display);font-size:12px;color:var(--muted)}
+.btn-ghost:hover{color:var(--fg);border-color:var(--muted)}
+
+/* MAP */
+.intro{max-width:64ch;margin:28px 0 8px}
+.intro h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,40px);line-height:1.1;margin:0 0 12px;text-wrap:balance}
+.intro h1 span{color:var(--torch)}
+.intro p{color:var(--muted);margin:0 0 8px}
+.rules{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin:14px 0 26px}
+.rules b{color:var(--fg);font-weight:700}
+.rooms{list-style:none;padding:4px;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.room{width:100%;display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;text-align:left;background:var(--panel);border:0;padding:14px;position:relative}
+.room:hover:not(:disabled){background:var(--panel-2)}
+.room:disabled{cursor:not-allowed;opacity:.5}
+.room canvas{width:56px;height:56px;image-rendering:pixelated;background:var(--code-bg)}
+.room .num{font-family:var(--f-display);font-size:11px;color:var(--muted);letter-spacing:.06em}
+.room .name{font-weight:700;line-height:1.25;margin:2px 0 6px}
+.room .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{font-family:var(--f-display);font-size:10px;letter-spacing:.04em;padding:2px 6px;background:var(--panel-2);color:var(--muted)}
+.chip.med{color:#ffc56b}
+.room .stars{font-size:14px;color:var(--torch);letter-spacing:2px;margin-left:auto}
+.room .stars .off{color:var(--line)}
+.room.boss{grid-column:1/-1}
+.room.boss .name{color:var(--torch)}
+.lock{font-family:var(--f-display);font-size:10px;color:var(--muted)}
+
+/* BATTLE */
+.battle{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;margin-top:22px;align-items:start}
+@media (max-width:860px){.battle{grid-template-columns:minmax(0,1fr);gap:22px}}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.stage{background:#000;padding:0;margin:4px}
+.stage canvas{display:block;width:100%;aspect-ratio:16/9;max-width:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+.stage-cap{display:flex;justify-content:space-between;gap:10px;font-family:var(--f-display);font-size:11px;color:var(--muted);padding:8px 2px 0;flex-wrap:wrap}
+.stage-cap b{color:var(--fg);font-weight:400}
+.quest{min-width:0}
+.eyebrow{font-family:var(--f-display);font-size:11px;letter-spacing:.06em;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.eyebrow .t{color:var(--torch)}
+.quest h2{font-family:var(--f-display);font-size:24px;line-height:1.15;margin:8px 0 10px;text-wrap:balance}
+.story{font-style:italic;color:var(--muted);margin:0 0 12px;max-width:62ch}
+.desc{max-width:65ch}
+.desc p{margin:0 0 10px}
+.sig{font-family:var(--f-code);font-size:14px;background:var(--code-bg);padding:10px 12px;overflow-x:auto;margin:12px 0;color:#ffd9a0}
+.examples{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.ex{font-family:var(--f-code);font-size:13px;color:var(--muted);overflow-x:auto;white-space:nowrap}
+.ex b{color:var(--fg);font-weight:600}
+.guide{background:var(--panel);margin:18px 4px 0;padding:0}
+.guide>summary{cursor:pointer;padding:12px 14px;font-family:var(--f-display);font-size:13px;color:var(--torch);list-style:none}
+.guide>summary::-webkit-details-marker{display:none}
+.guide>summary::before{content:"▸ ";display:inline-block}
+.guide[open]>summary::before{content:"▾ "}
+.gbody{padding:0 14px 16px;display:flex;flex-direction:column;gap:10px}
+.gstep{margin:6px 0 0;font-weight:700;display:flex;gap:10px;align-items:baseline}
+.gn{font-family:var(--f-display);font-size:11px;background:var(--torch);color:#1a0f02;padding:1px 6px;flex:none}
+.gthink{margin:0;padding:10px 12px;background:var(--panel-2);font-size:15px;color:#e6dcf5}
+.gplan{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;counter-reset:g}
+.gplan li{background:var(--panel-2);padding:10px 12px;counter-increment:g}
+.gplan .say{display:flex;gap:8px;align-items:baseline;font-size:15px}
+.gplan .say::before{content:counter(g) ".";font-family:var(--f-display);font-size:11px;color:var(--muted);flex:none}
+.gplan .tool{font-family:var(--f-code);font-size:11px;color:#1a0f02;background:#c9b8f0;padding:0 6px;flex:none}
+.gplan details{margin-top:6px}
+.gplan details summary{cursor:pointer;font-family:var(--f-display);font-size:10px;color:var(--muted)}
+.gplan pre{margin:6px 0 0;background:var(--code-bg);padding:8px 10px;font-family:var(--f-code);font-size:13px;overflow-x:auto;color:#ffd9a0}
+.hints{display:flex;flex-direction:column;gap:10px;margin:14px 0 0}
+.hint{background:#2a2215;border-left:4px solid var(--torch);padding:10px 12px;font-size:15px}
+.hint .h{font-family:var(--f-display);font-size:10px;color:var(--torch);display:block;margin-bottom:2px}
+.qactions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{border:0;background:var(--panel-2);padding:10px 14px;font-family:var(--f-display);font-size:12px;letter-spacing:.03em}
+.btn:hover{background:var(--line)}
+.btn.warn{color:#ffb4a8}
+
+.editor{background:var(--code-bg);margin:4px}
+.editor-head{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:2px solid var(--line);font-family:var(--f-display);font-size:11px;color:var(--muted)}
+.editor-head button{background:none;border:0;color:var(--muted);font-family:var(--f-display);font-size:11px;padding:2px 4px}
+.editor-head button:hover{color:var(--fg)}
+#editor{display:block;width:100%;min-height:300px;resize:vertical;background:transparent;color:#e9e2f5;border:0;padding:14px;font-family:var(--f-code);font-size:14px;line-height:1.6;tab-size:2;white-space:pre;overflow:auto}
+@media (max-width:860px){#editor{font-size:16px;min-height:260px}}
+.attack{display:flex;align-items:center;justify-content:center;gap:10px;width:calc(100% - 8px);margin:4px;border:0;background:var(--torch);color:#1a0f02;font-family:var(--f-display);font-weight:700;font-size:16px;padding:16px;box-shadow:0 6px 0 0 var(--torch-deep);transition:transform .06s}
+.attack:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 0 var(--torch-deep)}
+.attack:disabled{opacity:.55;cursor:progress}
+.attack small{font-family:var(--f-body);font-weight:400;font-size:12px;opacity:.75}
+.log{background:var(--panel);padding:14px;margin:4px}
+.log h3{font-family:var(--f-display);font-size:12px;font-weight:400;color:var(--muted);margin:0 0 10px;letter-spacing:.05em}
+.log .empty{color:var(--muted);font-size:14px;margin:0}
+.trow{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:13px;align-items:start}
+.trow:first-of-type{border-top:0}
+.trow .ic{font-family:var(--f-display);font-size:14px}
+.trow.pass .ic{color:var(--ok)}
+.trow.fail .ic{color:var(--bad)}
+.trow .call{font-family:var(--f-code);overflow-x:auto;white-space:nowrap}
+.trow .det{font-family:var(--f-code);color:var(--muted);margin-top:2px;white-space:pre-wrap;word-break:break-word}
+.trow .det .bad{color:var(--bad)}
+.trow .ms{font-family:var(--f-code);color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+.err{color:var(--bad);font-family:var(--f-code);font-size:13px;white-space:pre-wrap}
+.logs{margin-top:12px;font-family:var(--f-code);font-size:12px;background:var(--code-bg);padding:8px 10px;max-height:160px;overflow:auto;color:#cfc6e6;white-space:pre-wrap}
+
+/* MODAL */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(8,6,12,.82);display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet{background:var(--panel);max-width:680px;width:100%;max-height:100%;overflow:auto;padding:22px;margin:4px}
+.sheet h2{font-family:var(--f-display);font-size:26px;margin:0 0 4px;color:var(--torch)}
+.sheet h2.lose{color:var(--bad)}
+.bigstars{font-size:30px;letter-spacing:6px;color:var(--torch);margin:4px 0 12px}
+.bigstars .off{color:var(--line)}
+.sheet p{margin:0 0 12px;max-width:62ch}
+.cx{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.cx span{font-family:var(--f-code);font-size:13px;background:var(--panel-2);padding:3px 8px}
+.sheet pre{background:var(--code-bg);padding:14px;overflow-x:auto;font-family:var(--f-code);font-size:13px;line-height:1.6;margin:0 0 16px;color:#e9e2f5}
+.sheet .label{font-family:var(--f-display);font-size:11px;color:var(--muted);letter-spacing:.05em;margin:0 0 6px}
+.sheet .row{display:flex;gap:10px;flex-wrap:wrap}
+.btn.primary{background:var(--torch);color:#1a0f02}
+.btn.primary:hover{background:#ffb954}
+
+@media (prefers-reduced-motion:reduce){.attack{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hud">
+    <button class="btn-ghost" id="toMap" hidden>◂ Mapa</button>
+    <div class="brand">Masmorra do Algoritmo</div>
+    <div class="stats">
+      <div class="hearts" id="hearts" aria-label="Vida"></div>
+      <div class="stars-total" id="starsTotal">★ 0/30</div>
+    </div>
+  </header>
+
+  <section id="mapView">
+    <div class="intro">
+      <h1>Dez salas. Dez <span>LeetCodes</span> clássicos.</h1>
+      <p>Cada sala guarda um problema famoso de entrevista. Escreva a função em JavaScript e ataque: cada teste que passa é um golpe no monstro. Se algum teste falhar, ele contra-ataca e você perde um coração.</p>
+    </div>
+    <div class="rules">
+      <span><b>3 ★</b> limpar sem dicas e sem levar dano</span>
+      <span><b>Pergaminho</b> mostra uma dica e custa 1 ★</span>
+      <span><b>Teste de resistência</b> reprova soluções lentas demais</span>
+    </div>
+    <ol class="rooms" id="rooms"></ol>
+  </section>
+
+  <section id="battleView" hidden>
+    <div class="battle">
+      <div class="col">
+        <div>
+          <div class="stage pix"><canvas id="scene" width="192" height="108"></canvas></div>
+          <div class="stage-cap"><span id="capRoom">Sala 01</span><span><b id="capMonster"></b></span></div>
+        </div>
+        <article class="quest">
+          <div class="eyebrow" id="qEyebrow"></div>
+          <h2 id="qTitle"></h2>
+          <p class="story" id="qStory"></p>
+          <div class="desc" id="qDesc"></div>
+          <div class="sig" id="qSig"></div>
+          <div class="examples" id="qExamples"></div>
+          <details class="guide" id="guide" open>
+            <summary>Modo guiado: do problema ao código</summary>
+            <div class="gbody">
+              <p class="gstep"><span class="gn">1</span> Resolva o exemplo à mão, como uma pessoa faria.</p>
+              <p class="gthink" id="gThink"></p>
+              <p class="gstep"><span class="gn">2</span> Escreva o que você fez em frases curtas. Cada frase vira uma ferramenta que você já sabe usar.</p>
+              <ol class="gplan" id="gPlan"></ol>
+              <p class="gstep"><span class="gn">3</span> Cole o plano no editor e escreva o código embaixo de cada comentário.</p>
+              <button class="btn" id="pastePlan">Colar plano no editor</button>
+            </div>
+          </details>
+          <div class="hints" id="qHints"></div>
+          <div class="qactions">
+            <button class="btn" id="hintBtn">Ler pergaminho (−1 ★)</button>
+            <button class="btn warn" id="giveUpBtn">Ver solução</button>
+          </div>
+        </article>
+      </div>
+      <div class="col">
+        <div class="editor pix">
+          <div class="editor-head"><span id="fileName">solucao.js</span><button id="resetBtn">Restaurar código</button></div>
+          <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Editor de código"></textarea>
+        </div>
+        <button class="attack" id="attackBtn">⚔ Atacar <small>(Ctrl + Enter)</small></button>
+        <div class="log pix" id="log">
+          <h3>Registro de batalha</h3>
+          <p class="empty">Escreva sua função e ataque. O resultado de cada teste aparece aqui. <code>console.log</code> também funciona.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="modal" hidden></div>
+
+<script>
+/* ---------- SPRITES ---------- */
+const norm = a => { const r = a.map(s => (s + '................').slice(0, 16)); while (r.length < 16) r.push('................'); return r; };
+const SPR = {
+  hero: norm([
+    "......rr........",
+    ".....rrk........",
+    "...kkkkkkk......",
+    "..khhhhhhhk.....",
+    "..khkkkkkhk.....",
+    "..khseseshk...k.",
+    "..khsssssk...kwk",
+    "...kkkkkk....kwk",
+    "..kbbbybbk...kwk",
+    ".kbbbbybbbk..kwk",
+    ".ksbbbybbbsk.kwk",
+    ".kskbbbbbkskkyyk",
+    "..kkbbybbkk...y.",
+    "...kbbkbbk......",
+    "...kbk.kbk......",
+    "..kkkk.kkkk....."]),
+  slime: norm([
+    "", "", "", "", "",
+    "......kkkk......",
+    "....kkggggkk....",
+    "...kggggggLgk...",
+    "..kgggggggLLgk..",
+    "..kgwwggggwwgk..",
+    ".kggwkggggwkggk.",
+    ".kgggggggggggLk.",
+    ".kgggkkkkkgggLk.",
+    ".kggggggggggggk.",
+    "..kkkkkkkkkkkk..", ""]),
+  bat: norm([
+    "", "", "",
+    "k..............k",
+    "kk....k..k....kk",
+    "kgk...kkkk...kgk",
+    "kggk.kggggk.kggk",
+    "kgggkgwggwgkgggk",
+    "kggggggkkggggggk",
+    ".kggggggggggggk.",
+    "..kgk.kggk.kgk..",
+    "...k..kwwk..k...",
+    "......kkkk......", "", "", ""]),
+  skeleton: norm([
+    "",
+    ".....kkkkkk.....",
+    "....kggggggk....",
+    "...kggggggggk...",
+    "...kgkkggkkgk...",
+    "...kgkrggkrgk...",
+    "...kggggggggk...",
+    "....kgkgkgkk....",
+    ".....kkkkkk.....",
+    "...kkgkgkgkk....",
+    "..kgkkgkgkkgk...",
+    "..k.kgkgkgk.k...",
+    ".....kgggk......",
+    ".....kg.gk......",
+    ".....kg.gk......",
+    "....kkk.kkk....."]),
+  ghost: norm([
+    "",
+    "......kkkk......",
+    "....kkggggkk....",
+    "...kggggggggk...",
+    "..kggggggggggk..",
+    "..kggkkggkkggk..",
+    "..kggkwggkwggk..",
+    "..kggggggggggk..",
+    "..kgggkkkkgggk..",
+    "..kgggkrrkgggk..",
+    "..kggggggggggk..",
+    "..kggggggggggk..",
+    "..kggggggggggk..",
+    "..kgkggkkggkgk..",
+    "..kk.kk..kk.kk..", ""]),
+  dragon: norm([
+    "..........kk....",
+    ".........kgk....",
+    "......kkkggk....",
+    ".....kgggggkk...",
+    "....kgwkgggLgk..",
+    "....kggggggLgk..",
+    "...kkkkggggLk...",
+    "..kyykkgggLgk...",
+    "..k..kgggLLgkk..",
+    "kk..kggggLgggk..",
+    "kgkkgggggLggggk.",
+    ".kgggggggLgggggk",
+    "..kkggggggggggk.",
+    "....kgggkkgggk..",
+    "....kgk...kgk...",
+    "...kkk...kkk...."])
+};
+const HERO_PAL = {k:'#120d1a',h:'#b9c2d0',r:'#ec5d50',s:'#f1c49b',e:'#120d1a',b:'#3d6fd1',y:'#f2c14e',w:'#e8eef5'};
+const HEART = [".xx.xx.","xxxxxxx","xxxxxxx",".xxxxx.","..xxx..","...x..."];
+const heartSVG = (() => { let r = ''; HEART.forEach((row, y) => [...row].forEach((c, x) => { if (c === 'x') r += `<rect x="${x}" y="${y}" width="1" height="1"/>`; })); return `<svg viewBox="0 0 7 6" fill="currentColor" aria-hidden="true">${r}</svg>`; })();
+
+/* ---------- LEVELS ---------- */
+const BIG = Array.from({length: 100000}, (_, i) => i);
+const LEVELS = [
+{ id:'two-sum', lc:1, diff:'Easy', pattern:'Hash Map', fn:'twoSum', params:'nums, target', title:'Two Sum',
+  monster:'Slime Indexador', sprite:'slime', pal:{k:'#0e1a10',g:'#58b552',L:'#a7e58c',w:'#f3efe2'},
+  story:'Um slime guarda a ponte. Só passa quem achar as duas runas que somam o número gravado na pedra.',
+  desc:`<p>Dado um array de inteiros <code>nums</code> e um inteiro <code>target</code>, retorne os <b>índices</b> dos dois números que somam <code>target</code>.</p><p>Existe exatamente uma resposta e você não pode usar o mesmo elemento duas vezes. A ordem dos índices não importa.</p>`,
+  unordered:true,
+  tests:[ {args:[[2,7,11,15],9],expect:[0,1]}, {args:[[3,2,4],6],expect:[1,2]}, {args:[[3,3],6],expect:[0,1]},
+          {args:[[-1,-2,-3,-4,-5],-8],expect:[2,4]}, {args:[BIG,199995],expect:[99997,99998],label:'nums = [0, 1, …, 99999], target = 199995'} ],
+  hints:['Para cada número x, o que você procura é target − x. Como saber em O(1) se esse valor já apareceu antes?','Use um Map de valor → índice. Em cada passo, verifique se o complemento já está no Map; só depois guarde o número atual.'],
+  solution:`function twoSum(nums, target) {
+  const seen = new Map(); // valor -> índice
+  for (let i = 0; i < nums.length; i++) {
+    const need = target - nums[i];
+    if (seen.has(need)) return [seen.get(need), i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}`, time:'O(n)', space:'O(n)',
+  lesson:'Trocar o laço interno por uma consulta em Map é o truque mais cobrado em entrevista. Você gasta memória e derruba o tempo de O(n²) para O(n).' },
+
+{ id:'contains-duplicate', lc:217, diff:'Easy', pattern:'Set', fn:'containsDuplicate', params:'nums', title:'Contains Duplicate',
+  monster:'Gosma Repetida', sprite:'slime', pal:{k:'#0d1424',g:'#4a86d6',L:'#9cc6f2',w:'#f3efe2'},
+  story:'Esta gosma se divide quando vê algo repetido. Descubra antes dela.',
+  desc:`<p>Dado um array <code>nums</code>, retorne <code>true</code> se algum valor aparecer pelo menos duas vezes, e <code>false</code> se todos forem distintos.</p>`,
+  tests:[ {args:[[1,2,3,1]],expect:true}, {args:[[1,2,3,4]],expect:false}, {args:[[1,1,1,3,3,4,3,2,4,2]],expect:true},
+          {args:[[]],expect:false}, {args:[BIG],expect:false,label:'nums = [0, 1, …, 99999]'} ],
+  hints:['Comparar cada par é O(n²) e não sobrevive ao teste de resistência.','Um Set guarda o que você já viu. Se o número já está lá, achou a duplicata.'],
+  solution:`function containsDuplicate(nums) {
+  const seen = new Set();
+  for (const n of nums) {
+    if (seen.has(n)) return true;
+    seen.add(n);
+  }
+  return false;
+}`, time:'O(n)', space:'O(n)',
+  lesson:'Set é o Map sem valor: perfeito para "já vi isso?". Também dá para ordenar e comparar vizinhos em O(n log n) sem memória extra.' },
+
+{ id:'valid-anagram', lc:242, diff:'Easy', pattern:'Contagem', fn:'isAnagram', params:'s, t', title:'Valid Anagram',
+  monster:'Morcego Embaralhado', sprite:'bat', pal:{k:'#140c20',g:'#7a4fb8',w:'#ffd36b'},
+  story:'O morcego troca as letras dos nomes de quem entra. Prove que é o mesmo nome.',
+  desc:`<p>Dadas duas strings <code>s</code> e <code>t</code>, retorne <code>true</code> se <code>t</code> for um anagrama de <code>s</code>: as mesmas letras, nas mesmas quantidades, em qualquer ordem.</p>`,
+  tests:[ {args:['anagram','nagaram'],expect:true}, {args:['rat','car'],expect:false}, {args:['a','ab'],expect:false},
+          {args:['listen','silent'],expect:true}, {args:['aacc','ccac'],expect:false} ],
+  hints:['Se os tamanhos forem diferentes, já pode responder.','Conte as letras de s num objeto, depois desconte as de t. Se algum contador ficar negativo, não é anagrama.'],
+  solution:`function isAnagram(s, t) {
+  if (s.length !== t.length) return false;
+  const count = {};
+  for (const c of s) count[c] = (count[c] || 0) + 1;
+  for (const c of t) {
+    if (!count[c]) return false;
+    count[c]--;
+  }
+  return true;
+}`, time:'O(n)', space:'O(k), k = letras distintas',
+  lesson:'Contagem de frequência resolve uma família inteira: anagramas, agrupar anagramas, "primeiro caractere único". Ordenar as duas strings também funciona, em O(n log n).' },
+
+{ id:'valid-palindrome', lc:125, diff:'Easy', pattern:'Dois Ponteiros', fn:'isPalindrome', params:'s', title:'Valid Palindrome',
+  monster:'Morcego Espelhado', sprite:'bat', pal:{k:'#1c0b0e',g:'#b8434b',w:'#f3efe2'},
+  story:'Ele só respeita frases que se leem igual nos dois sentidos.',
+  desc:`<p>Uma frase é palíndromo se, depois de converter tudo para minúsculas e remover o que não for letra ou número, ela se lê igual de trás para frente.</p><p>Dada a string <code>s</code>, retorne <code>true</code> se ela for palíndromo.</p>`,
+  tests:[ {args:['A man, a plan, a canal: Panama'],expect:true}, {args:['race a car'],expect:false}, {args:[' '],expect:true},
+          {args:['0P'],expect:false}, {args:['Socorram-me, subi no onibus em Marrocos'],expect:true} ],
+  hints:['Um ponteiro no começo e outro no fim, andando um em direção ao outro.','Pule caracteres que não sejam letra ou número com /[a-z0-9]/i e compare em minúsculas.'],
+  solution:`function isPalindrome(s) {
+  const ok = c => /[a-z0-9]/i.test(c);
+  let l = 0, r = s.length - 1;
+  while (l < r) {
+    while (l < r && !ok(s[l])) l++;
+    while (l < r && !ok(s[r])) r--;
+    if (s[l].toLowerCase() !== s[r].toLowerCase()) return false;
+    l++; r--;
+  }
+  return true;
+}`, time:'O(n)', space:'O(1)',
+  lesson:'Dois ponteiros vindo das pontas evitam criar uma string limpa e invertida. O mesmo padrão aparece em Container With Most Water e 3Sum.' },
+
+{ id:'valid-parentheses', lc:20, diff:'Easy', pattern:'Pilha', fn:'isValid', params:'s', title:'Valid Parentheses',
+  monster:'Esqueleto Desbalanceado', sprite:'skeleton', pal:{k:'#1a1424',g:'#e6dcc4',r:'#ec5d50'},
+  story:'Os ossos dele estão fora de ordem. Feche cada abertura no lugar certo.',
+  desc:`<p>Dada uma string com apenas <code>()[]{}</code>, retorne <code>true</code> se ela for válida: cada abertura fecha com o mesmo tipo e na ordem correta.</p>`,
+  tests:[ {args:['()'],expect:true}, {args:['()[]{}'],expect:true}, {args:['(]'],expect:false}, {args:['([)]'],expect:false},
+          {args:['{[]}'],expect:true}, {args:['('],expect:false}, {args:[')'],expect:false} ],
+  hints:['O último que abriu é o primeiro que precisa fechar. Que estrutura funciona assim?','Empilhe aberturas. Ao ver um fechamento, desempilhe e confira o par. No fim, a pilha precisa estar vazia.'],
+  solution:`function isValid(s) {
+  const pairs = { ')': '(', ']': '[', '}': '{' };
+  const stack = [];
+  for (const c of s) {
+    if (pairs[c]) {
+      if (stack.pop() !== pairs[c]) return false;
+    } else {
+      stack.push(c);
+    }
+  }
+  return stack.length === 0;
+}`, time:'O(n)', space:'O(n)',
+  lesson:'Sempre que o problema fala em "o mais recente" ou em aninhamento, pense em pilha. Em JS, um array com push e pop já resolve.' },
+
+{ id:'binary-search', lc:704, diff:'Easy', pattern:'Busca Binária', fn:'search', params:'nums, target', title:'Binary Search',
+  monster:'Fantasma Bissetor', sprite:'ghost', pal:{k:'#20304a',g:'#b9d4e8',w:'#f3efe2',r:'#ec5d50'},
+  story:'Ele se esconde num corredor ordenado. Corte o corredor ao meio até encurralá-lo.',
+  desc:`<p>Dado um array <code>nums</code> ordenado em ordem crescente e um <code>target</code>, retorne o índice de <code>target</code> ou <code>-1</code> se não existir.</p><p>O objetivo é O(log n), então nada de <code>indexOf</code>.</p>`,
+  tests:[ {args:[[-1,0,3,5,9,12],9],expect:4}, {args:[[-1,0,3,5,9,12],2],expect:-1}, {args:[[5],5],expect:0},
+          {args:[[1,3],3],expect:1}, {args:[[2,4,6,8,10,12,14],2],expect:0} ],
+  hints:['Olhe o meio. Se for menor que o alvo, a metade esquerda inteira pode ser descartada.','Use lo e hi, laço enquanto lo <= hi, e mova lo = mid + 1 ou hi = mid - 1.'],
+  solution:`function search(nums, target) {
+  let lo = 0, hi = nums.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (nums[mid] === target) return mid;
+    if (nums[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return -1;
+}`, time:'O(log n)', space:'O(1)',
+  lesson:'Os bugs da busca binária moram nas bordas: <= ou <, mid+1 ou mid. Decore este molde e adapte para "primeira posição onde a condição vira verdadeira".' },
+
+{ id:'stock', lc:121, diff:'Easy', pattern:'Greedy', fn:'maxProfit', params:'prices', title:'Best Time to Buy and Sell Stock',
+  monster:'Esqueleto Mercador', sprite:'skeleton', pal:{k:'#2a1c08',g:'#e7c25a',r:'#7ad0ff'},
+  story:'Ele vende ouro amaldiçoado. Compre barato, venda caro, uma vez só.',
+  desc:`<p><code>prices[i]</code> é o preço de uma ação no dia <code>i</code>. Escolha um dia para comprar e um dia <b>posterior</b> para vender.</p><p>Retorne o maior lucro possível, ou <code>0</code> se não der lucro.</p>`,
+  tests:[ {args:[[7,1,5,3,6,4]],expect:5}, {args:[[7,6,4,3,1]],expect:0}, {args:[[2,4,1]],expect:2}, {args:[[1]],expect:0},
+          {args:[[3,2,6,5,0,3]],expect:4} ],
+  hints:['Se você vendesse hoje, qual seria o melhor dia para ter comprado?','Percorra uma vez guardando o menor preço visto até agora e o melhor lucro (preço atual − menor).'],
+  solution:`function maxProfit(prices) {
+  let min = Infinity, best = 0;
+  for (const p of prices) {
+    min = Math.min(min, p);
+    best = Math.max(best, p - min);
+  }
+  return best;
+}`, time:'O(n)', space:'O(1)',
+  lesson:'Carregar "o melhor até aqui" numa variável transforma comparações entre pares em uma passada só. É a mesma ideia do Kadane, duas salas à frente.' },
+
+{ id:'climbing-stairs', lc:70, diff:'Easy', pattern:'Prog. Dinâmica', fn:'climbStairs', params:'n', title:'Climbing Stairs',
+  monster:'Espectro da Escadaria', sprite:'ghost', pal:{k:'#123224',g:'#8fe0b0',w:'#f3efe2',r:'#2b6b4a'},
+  story:'Uma escada sem fim. Ele pergunta de quantas formas você consegue subir.',
+  desc:`<p>Você sobe uma escada de <code>n</code> degraus dando passos de 1 ou 2 degraus. De quantas formas distintas dá para chegar ao topo?</p><p>Atenção ao teste com <code>n = 45</code>: recursão sem memória não termina a tempo.</p>`,
+  tests:[ {args:[1],expect:1}, {args:[2],expect:2}, {args:[3],expect:3}, {args:[5],expect:8}, {args:[10],expect:89}, {args:[45],expect:1836311903} ],
+  hints:['Para chegar ao degrau n, seu último passo veio do degrau n−1 ou do n−2.','formas(n) = formas(n−1) + formas(n−2). Calcule de baixo para cima guardando só os dois últimos valores.'],
+  solution:`function climbStairs(n) {
+  let a = 1, b = 1; // formas para os degraus i-2 e i-1
+  for (let i = 2; i <= n; i++) {
+    [a, b] = [b, a + b];
+  }
+  return b;
+}`, time:'O(n)', space:'O(1)',
+  lesson:'É Fibonacci disfarçado. Programação dinâmica é isto: achar a recorrência e evitar recalcular subproblemas, com memo ou de baixo para cima.' },
+
+{ id:'max-subarray', lc:53, diff:'Medium', pattern:'Kadane', fn:'maxSubArray', params:'nums', title:'Maximum Subarray',
+  monster:'Magma de Kadane', sprite:'slime', pal:{k:'#2a0e06',g:'#e2662e',L:'#ffc04d',w:'#fff1c9'},
+  story:'Um rio de lava com trechos quentes e frios. Encontre o trecho contínuo mais quente.',
+  desc:`<p>Dado o array <code>nums</code>, encontre o subarray <b>contínuo</b> (com pelo menos um elemento) de maior soma e retorne essa soma.</p>`,
+  tests:[ {args:[[-2,1,-3,4,-1,2,1,-5,4]],expect:6}, {args:[[1]],expect:1}, {args:[[5,4,-1,7,8]],expect:23}, {args:[[-3,-1,-2]],expect:-1},
+          {args:[[8,-19,5,-4,20]],expect:21} ],
+  hints:['Em cada posição, decida: continuar o subarray anterior ou começar um novo aqui?','cur = max(nums[i], cur + nums[i]); best = max(best, cur). Comece os dois com nums[0] para lidar com tudo negativo.'],
+  solution:`function maxSubArray(nums) {
+  let cur = nums[0], best = nums[0];
+  for (let i = 1; i < nums.length; i++) {
+    cur = Math.max(nums[i], cur + nums[i]);
+    best = Math.max(best, cur);
+  }
+  return best;
+}`, time:'O(n)', space:'O(1)',
+  lesson:'Kadane é DP com uma variável: o melhor subarray que termina em i. Se a soma acumulada ficou negativa, ela só atrapalha, então recomece.' },
+
+{ id:'longest-substring', lc:3, diff:'Medium', pattern:'Janela Deslizante', fn:'lengthOfLongestSubstring', params:'s', title:'Longest Substring Without Repeating Characters', boss:true,
+  monster:'Dragão da Janela Deslizante', sprite:'dragon', flip:true, pal:{k:'#0b1a14',g:'#3f9e78',L:'#a6e3b5',y:'#f0a23b',w:'#ffe28a'},
+  story:'O chefe final. O sopro dele só para quando você mede a maior janela sem letras repetidas.',
+  desc:`<p>Dada a string <code>s</code>, retorne o tamanho da maior substring sem caracteres repetidos.</p>`,
+  tests:[ {args:['abcabcbb'],expect:3}, {args:['bbbbb'],expect:1}, {args:['pwwkew'],expect:3}, {args:[''],expect:0},
+          {args:['dvdf'],expect:3}, {args:['abba'],expect:2}, {args:[' '],expect:1} ],
+  hints:['Mantenha uma janela [start, i] sem repetições e expanda i um passo por vez.','Guarde num Map o último índice de cada caractere. Ao repetir, mova start para depois dele, mas nunca para trás (veja o caso "abba").'],
+  solution:`function lengthOfLongestSubstring(s) {
+  const last = new Map(); // char -> último índice
+  let start = 0, best = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (last.has(c) && last.get(c) >= start) start = last.get(c) + 1;
+    last.set(c, i);
+    best = Math.max(best, i - start + 1);
+  }
+  return best;
+}`, time:'O(n)', space:'O(k)',
+  lesson:'Janela deslizante: dois índices que só andam para frente, e uma estrutura que descreve o que está dentro da janela. Serve para Minimum Window Substring, Longest Repeating Character Replacement e muitos outros.' }
+];
+const starter = L => `function ${L.fn}(${L.params}) {\n  // seu código aqui\n\n}\n`;
+
+/* ---------- MODO GUIADO: resolver à mão -> plano em português -> código ---------- */
+// cada passo: [ferramenta que você já conhece, frase em português, código daquele passo]
+const GUIDE = {
+'two-sum': { think:'Com [2, 7, 11, 15] e alvo 9: olho o 2, faltam 7. Ainda não vi nenhum 7, então anoto "o 2 está na posição 0". Olho o 7, faltam 2. Já anotei o 2! Resposta: [0, 1].',
+  plan:[
+  ['objeto','Crie um objeto vazio para anotar cada número já visto e a posição dele.','const vistos = {};'],
+  ['for','Ande por cada posição do array.','for (let i = 0; i < nums.length; i++) {'],
+  ['variável','Calcule quanto falta para chegar no target.','const falta = target - nums[i];'],
+  ['if','Se o que falta já está anotado, achou o par: devolva as duas posições.','if (vistos[falta] !== undefined) {\n  return [vistos[falta], i];\n}'],
+  ['objeto','Senão, anote o número atual e a posição dele. Feche o for.','vistos[nums[i]] = i;\n}']]},
+'contains-duplicate': { think:'Com [1, 2, 3, 1]: vejo o 1 e anoto. Vejo o 2, anoto. Vejo o 3, anoto. Vejo o 1 de novo: já estava anotado. Tem repetido, resposta true.',
+  plan:[
+  ['objeto','Crie um objeto vazio para anotar os números já vistos.','const vistos = {};'],
+  ['for','Ande por cada número do array.','for (let i = 0; i < nums.length; i++) {\n  const n = nums[i];'],
+  ['if','Se esse número já foi anotado, achou repetido: devolva true.','if (vistos[n]) return true;'],
+  ['objeto','Senão, anote que ele apareceu. Feche o for.','vistos[n] = true;\n}'],
+  ['return','Se o for terminou sem achar repetido, devolva false.','return false;']]},
+'valid-anagram': { think:'"rat" e "car": conto as letras de rat: r=1, a=1, t=1. Agora desconto as de car: c? Não tenho nenhum c. Não é anagrama.',
+  plan:[
+  ['if','Se os tamanhos forem diferentes, já devolva false.','if (s.length !== t.length) return false;'],
+  ['objeto','Crie um objeto para contar quantas vezes cada letra aparece.','const conta = {};'],
+  ['for','Ande pelas letras de s somando 1 na contagem de cada uma.','for (let i = 0; i < s.length; i++) {\n  const letra = s[i];\n  conta[letra] = (conta[letra] || 0) + 1;\n}'],
+  ['for + if','Ande pelas letras de t. Se a letra não tem saldo, devolva false. Se tem, tire 1.','for (let i = 0; i < t.length; i++) {\n  const letra = t[i];\n  if (!conta[letra]) return false;\n  conta[letra]--;\n}'],
+  ['return','Se passou por tudo, é anagrama.','return true;']]},
+'valid-palindrome': { think:'"race a car" vira "raceacar". Comparo a primeira com a última: r e r, ok. a e a, ok. c e c, ok. e e a: diferentes. Não é palíndromo.',
+  plan:[
+  ['variável','Deixe tudo minúsculo e remova o que não é letra ou número.',"const limpo = s.toLowerCase().replace(/[^a-z0-9]/g, '');"],
+  ['variável','Crie dois marcadores: um no começo e outro no fim.','let esq = 0;\nlet dir = limpo.length - 1;'],
+  ['while','Enquanto eles não se cruzarem, continue comparando.','while (esq < dir) {'],
+  ['if','Se as letras das duas pontas forem diferentes, devolva false.','if (limpo[esq] !== limpo[dir]) return false;'],
+  ['variável','Aproxime os marcadores um do outro. Feche o while.','esq++;\ndir--;\n}'],
+  ['return','Se nunca achou diferença, é palíndromo.','return true;']]},
+'valid-parentheses': { think:'"{[]}": abre {, guardo. Abre [, guardo em cima. Fecha ]: o último que guardei é [, combina, tiro. Fecha }: o último agora é {, combina. Sobrou nada guardado: válido.',
+  plan:[
+  ['objeto','Crie um objeto que diz qual abertura combina com cada fechamento.',"const par = { ')': '(', ']': '[', '}': '{' };"],
+  ['array','Crie um array vazio para guardar as aberturas (a pilha).','const pilha = [];'],
+  ['for','Ande por cada caractere da string.','for (let i = 0; i < s.length; i++) {\n  const c = s[i];'],
+  ['if','Se for um fechamento, tire o último guardado e confira se é o par certo.','if (par[c]) {\n  const ultimo = pilha.pop();\n  if (ultimo !== par[c]) return false;\n}'],
+  ['else','Se for abertura, guarde na pilha. Feche o for.','else {\n  pilha.push(c);\n}\n}'],
+  ['return','No fim, só é válido se não sobrou nada aberto.','return pilha.length === 0;']]},
+'binary-search': { think:'Procuro 9 em [-1, 0, 3, 5, 9, 12]. O meio é 3: 9 é maior, descarto a metade da esquerda. Sobra [5, 9, 12], o meio é 9. Achei, posição 4.',
+  plan:[
+  ['variável','Marque o começo e o fim da parte onde o alvo ainda pode estar.','let inicio = 0;\nlet fim = nums.length - 1;'],
+  ['while','Enquanto ainda sobrar espaço para procurar, continue.','while (inicio <= fim) {'],
+  ['variável','Ache a posição do meio.','const meio = Math.floor((inicio + fim) / 2);'],
+  ['if','Se o meio é o alvo, devolva a posição.','if (nums[meio] === target) return meio;'],
+  ['if / else','Se o meio é menor que o alvo, jogue fora a esquerda. Senão, jogue fora a direita. Feche o while.','if (nums[meio] < target) {\n  inicio = meio + 1;\n} else {\n  fim = meio - 1;\n}\n}'],
+  ['return','Se o espaço acabou, o alvo não existe.','return -1;']]},
+'stock': { think:'[7, 1, 5, 3, 6, 4]: o menor preço até agora vira 1 no dia 2. Vendendo a 5 lucro 4, a 3 lucro 2, a 6 lucro 5, a 4 lucro 3. O melhor foi 5.',
+  plan:[
+  ['variável','Guarde o menor preço visto até agora e o melhor lucro (começa em 0).','let menor = Infinity;\nlet lucro = 0;'],
+  ['for','Ande por cada preço.','for (let i = 0; i < prices.length; i++) {\n  const p = prices[i];'],
+  ['if','Se este preço é o menor até agora, ele vira o novo dia de compra.','if (p < menor) menor = p;'],
+  ['if','Se vender hoje dá mais lucro que o melhor guardado, atualize. Feche o for.','if (p - menor > lucro) lucro = p - menor;\n}'],
+  ['return','Devolva o melhor lucro.','return lucro;']]},
+'climbing-stairs': { think:'1 degrau: 1 forma. 2 degraus: 2 formas (1+1 ou 2). 3 degraus: ou venho do degrau 2 ou do 1, então 2 + 1 = 3. 4 degraus: 3 + 2 = 5. Cada um é a soma dos dois anteriores.',
+  plan:[
+  ['if','Se n for 1 ou 2, a resposta é o próprio n.','if (n <= 2) return n;'],
+  ['variável','Guarde as formas dos dois degraus anteriores: degrau 1 e degrau 2.','let antes = 1;\nlet agora = 2;'],
+  ['for','Do degrau 3 até o n, calcule o próximo somando os dois anteriores e ande uma casa.','for (let i = 3; i <= n; i++) {\n  const proximo = antes + agora;\n  antes = agora;\n  agora = proximo;\n}'],
+  ['return','Devolva as formas do último degrau.','return agora;']]},
+'max-subarray': { think:'[-2, 1, -3, 4, -1, 2, 1]: soma -2, ruim, recomeço no 1. 1 + (-3) = -2, ruim, recomeço no 4. 4 - 1 = 3, + 2 = 5, + 1 = 6. A maior soma que vi foi 6.',
+  plan:[
+  ['variável','Guarde a soma do trecho atual e a melhor soma vista, as duas começando no primeiro número.','let atual = nums[0];\nlet melhor = nums[0];'],
+  ['for','Ande a partir da segunda posição.','for (let i = 1; i < nums.length; i++) {'],
+  ['if / else','Se a soma atual ficou negativa, ela só atrapalha: recomece neste número. Senão, some.','if (atual < 0) {\n  atual = nums[i];\n} else {\n  atual += nums[i];\n}'],
+  ['if','Se a soma atual é a maior até agora, guarde. Feche o for.','if (atual > melhor) melhor = atual;\n}'],
+  ['return','Devolva a melhor soma.','return melhor;']]},
+'longest-substring': { think:'"abcabcbb": janela "abc" tem 3. Chega outro a: o a anterior estava na posição 0, então a janela começa na 1: "bca". Sempre que repete, pulo o começo para depois da repetição. O maior tamanho foi 3.',
+  plan:[
+  ['objeto','Crie um objeto que guarda a última posição em que cada letra apareceu.','const ultimaVez = {};'],
+  ['variável','Guarde onde a janela começa e o maior tamanho encontrado.','let inicio = 0;\nlet maior = 0;'],
+  ['for','Ande por cada letra.','for (let i = 0; i < s.length; i++) {\n  const letra = s[i];'],
+  ['if','Se essa letra já apareceu dentro da janela atual, mova o começo para logo depois dela.','if (ultimaVez[letra] >= inicio) {\n  inicio = ultimaVez[letra] + 1;\n}'],
+  ['objeto','Anote a posição atual da letra.','ultimaVez[letra] = i;'],
+  ['if','Meça a janela. Se for a maior até agora, guarde. Feche o for.','const tamanho = i - inicio + 1;\nif (tamanho > maior) maior = tamanho;\n}'],
+  ['return','Devolva o maior tamanho.','return maior;']]}
+};
+const planStarter = L => `function ${L.fn}(${L.params}) {\n` + GUIDE[L.id].plan.map((p, i) => `  // ${i + 1}. ${p[1]}\n\n`).join('') + `}\n`;
+
+/* ---------- STATE ---------- */
+const store = { get(){ try { return JSON.parse(localStorage.getItem('masmorra-v1')) || null; } catch(e){ return null; } },
+                set(v){ try { localStorage.setItem('masmorra-v1', JSON.stringify(v)); } catch(e){} } };
+const prog = store.get() || { cleared:{}, code:{} };
+const save = () => store.set(prog);
+const MAXH = 5;
+let cur = null, hearts = MAXH, hintsUsed = 0, hits = 0, busy = false;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = v => v === undefined ? 'undefined' : JSON.stringify(v);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function renderHUD(){
+  $('hearts').innerHTML = Array.from({length:MAXH}, (_, i) => `<span class="${i < hearts ? '' : 'empty'}">${heartSVG}</span>`).join('');
+  $('hearts').setAttribute('aria-label', `Vida: ${hearts} de ${MAXH}`);
+  const total = Object.values(prog.cleared).reduce((a, b) => a + b, 0);
+  $('starsTotal').textContent = `★ ${total}/${LEVELS.length * 3}`;
+}
+const starsHTML = n => '★★★'.split('').map((s, i) => `<span class="${i < n ? '' : 'off'}">★</span>`).join('');
+
+/* ---------- MAP ---------- */
+function drawSprite(c, rows, pal, x, y, s, flip, tint){
+  for (let r = 0; r < 16; r++){ const row = rows[r];
+    for (let i = 0; i < 16; i++){ const ch = row[i]; if (ch === '.') continue;
+      c.fillStyle = tint || pal[ch] || '#f0f';
+      c.fillRect(flip ? x + (15 - i) * s : x + i * s, y + r * s, s, s); } }
+}
+function renderMap(){
+  const ol = $('rooms'); ol.innerHTML = '';
+  LEVELS.forEach((L, i) => {
+    const unlocked = i === 0 || prog.cleared[LEVELS[i-1].id] !== undefined;
+    const st = prog.cleared[L.id];
+    const li = document.createElement('li'); if (L.boss) li.className = 'room-boss-li';
+    li.innerHTML = `<button class="room pix${L.boss ? ' boss' : ''}" ${unlocked ? '' : 'disabled'} data-i="${i}">
+      <canvas width="16" height="16"></canvas>
+      <div style="min-width:0">
+        <div class="num">SALA ${String(i+1).padStart(2,'0')} · #${L.lc}${L.boss ? ' · CHEFE' : ''}</div>
+        <div class="name">${esc(L.title)}</div>
+        <div class="meta"><span class="chip">${esc(L.pattern)}</span><span class="chip ${L.diff === 'Medium' ? 'med' : ''}">${L.diff}</span>
+        ${unlocked ? (st !== undefined ? `<span class="stars">${starsHTML(st)}</span>` : '') : '<span class="lock">▣ trancada</span>'}</div>
+      </div></button>`;
+    if (L.boss) li.style.gridColumn = '1/-1';
+    ol.appendChild(li);
+    const c = li.querySelector('canvas').getContext('2d');
+    drawSprite(c, SPR[L.sprite], L.pal, 0, 0, 1, L.flip, unlocked ? null : '#2b2440');
+  });
+}
+$('rooms').addEventListener('click', e => { const b = e.target.closest('.room'); if (b && !b.disabled) enterRoom(+b.dataset.i); });
+
+/* ---------- ROOM ---------- */
+function enterRoom(i){
+  cur = LEVELS[i]; cur.index = i;
+  hearts = MAXH; hintsUsed = 0; hits = 0;
+  $('mapView').hidden = true; $('battleView').hidden = false; $('toMap').hidden = false;
+  $('capRoom').textContent = `Sala ${String(i+1).padStart(2,'0')} de ${LEVELS.length}`;
+  $('capMonster').textContent = cur.monster;
+  $('qEyebrow').innerHTML = `<span class="t">${esc(cur.pattern)}</span><span>${cur.diff}</span><span>LeetCode #${cur.lc}</span>`;
+  $('qTitle').textContent = cur.title;
+  $('qStory').textContent = cur.story;
+  $('qDesc').innerHTML = cur.desc;
+  $('qSig').textContent = `${cur.fn}(${cur.params})`;
+  $('qExamples').innerHTML = cur.tests.slice(0, 2).map(t => `<div class="ex">${esc(callStr(t))} → <b>${esc(fmt(t.expect))}</b></div>`).join('');
+  const G = GUIDE[cur.id];
+  $('gThink').textContent = G.think;
+  $('gPlan').innerHTML = G.plan.map(p => `<li><div class="say"><span>${esc(p[1])} <span class="tool">${esc(p[0])}</span></span></div>
+    <details><summary>Ver o código deste passo</summary><pre>${esc(p[2])}</pre></details></li>`).join('');
+  $('qHints').innerHTML = '';
+  $('hintBtn').disabled = false; $('hintBtn').textContent = 'Ler pergaminho (−1 ★)';
+  $('fileName').textContent = `${cur.id}.js`;
+  $('editor').value = prog.code[cur.id] || starter(cur);
+  resetLog();
+  resetScene();
+  renderHUD();
+  scrollTo({top:0, behavior: RM ? 'auto' : 'smooth'});
+}
+function callStr(t){ return t.label ? `${cur.fn}(${t.label})` : `${cur.fn}(${t.args.map(a => fmt(a)).join(', ')})`; }
+function toMap(){ $('battleView').hidden = true; $('mapView').hidden = false; $('toMap').hidden = true; cur = null; hearts = MAXH; renderMap(); renderHUD(); closeModal(); }
+$('toMap').onclick = toMap;
+
+$('hintBtn').onclick = () => {
+  if (hintsUsed >= cur.hints.length) return;
+  const h = cur.hints[hintsUsed++];
+  const d = document.createElement('div'); d.className = 'hint';
+  d.innerHTML = `<span class="h">Pergaminho ${hintsUsed}</span>${esc(h)}`;
+  $('qHints').appendChild(d);
+  if (hintsUsed >= cur.hints.length){ $('hintBtn').disabled = true; $('hintBtn').textContent = 'Sem mais pergaminhos'; }
+};
+let giveUpArmed = 0;
+$('giveUpBtn').onclick = () => {
+  if (Date.now() - giveUpArmed > 3000){ giveUpArmed = Date.now(); $('giveUpBtn').textContent = 'Toque de novo para confirmar'; setTimeout(() => { $('giveUpBtn').textContent = 'Ver solução'; }, 3000); return; }
+  giveUpArmed = 0; $('giveUpBtn').textContent = 'Ver solução';
+  if (prog.cleared[cur.id] === undefined){ prog.cleared[cur.id] = 0; save(); }
+  showSolution(null);
+};
+let pasteArmed = 0;
+$('pastePlan').onclick = () => {
+  const v = ed.value.trim(), btn = $('pastePlan');
+  const pristine = v === starter(cur).trim() || v === planStarter(cur).trim() || v === '';
+  if (!pristine && Date.now() - pasteArmed > 3000){
+    pasteArmed = Date.now(); btn.textContent = 'Isso apaga seu código. Toque de novo';
+    setTimeout(() => { btn.textContent = 'Colar plano no editor'; }, 3000); return;
+  }
+  pasteArmed = 0; btn.textContent = 'Plano colado ✓';
+  setTimeout(() => { btn.textContent = 'Colar plano no editor'; }, 1800);
+  ed.value = planStarter(cur); prog.code[cur.id] = ed.value; save();
+  ed.focus(); const p = ed.value.indexOf('\n\n') + 1; ed.setSelectionRange(p, p);
+};
+$('resetBtn').onclick =() => { $('editor').value = starter(cur); prog.code[cur.id] = $('editor').value; save(); };
+
+const ed = $('editor');
+ed.addEventListener('keydown', e => {
+  if (e.key === 'Tab'){ e.preventDefault(); const s = ed.selectionStart, en = ed.selectionEnd; ed.setRangeText('  ', s, en, 'end'); }
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); attack(); }
+});
+ed.addEventListener('input', () => { if (cur){ prog.code[cur.id] = ed.value; save(); } });
+
+/* ---------- RUNNER (Web Worker, com timeout) ---------- */
+const workerSrc = `
+const send = m => postMessage(m);
+const f2 = v => { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch(e){ return String(v); } };
+console.log = (...a) => send({type:'log', text:a.map(f2).join(' ')});
+console.info = console.warn = console.error = console.log;
+onmessage = e => {
+  const {code, fn, tests} = e.data; let f;
+  try { f = (new Function(code + '\\n;return (typeof ' + fn + ' === "function") ? ' + fn + ' : null;'))(); }
+  catch(err){ send({type:'compile', error: String(err && err.message || err)}); return; }
+  if (!f){ send({type:'compile', error: 'Não encontrei a função ' + fn + '(). Mantenha o nome original.'}); return; }
+  for (const args of tests){
+    let r;
+    try { const t0 = performance.now(); const out = f(...args); const ms = performance.now() - t0;
+      r = {type:'result', ok:true, out: out === undefined ? '__undef__' : JSON.stringify(out), ms}; }
+    catch(err){ r = {type:'result', ok:false, error: String(err && err.message || err)}; }
+    send(r);
+  }
+};`;
+const workerURL = URL.createObjectURL(new Blob([workerSrc], {type:'text/javascript'}));
+function runTests(code, L){
+  return new Promise(resolve => {
+    let w; try { w = new Worker(workerURL); } catch(e){ resolve({compileError:'Não consegui iniciar o executor: ' + e.message, results:[], logs:[]}); return; }
+    const results = [], logs = []; let timer, done = false;
+    const finish = extra => { if (done) return; done = true; clearTimeout(timer); w.terminate(); resolve({results, logs, ...extra}); };
+    const arm = () => { clearTimeout(timer); timer = setTimeout(() => {
+      results.push({ok:false, timeout:true});
+      while (results.length < L.tests.length) results.push({ok:false, skipped:true});
+      finish({timedOut:true}); }, 2500); };
+    w.onmessage = e => { const m = e.data;
+      if (m.type === 'log'){ if (logs.length < 200) logs.push(m.text); }
+      else if (m.type === 'compile') finish({compileError:m.error});
+      else if (m.type === 'result'){ results.push(m); if (results.length === L.tests.length) finish(); else arm(); } };
+    w.onerror = e => { e.preventDefault(); finish({compileError: e.message || 'Erro de sintaxe'}); };
+    arm();
+    w.postMessage({code, fn:L.fn, tests:L.tests.map(t => t.args)});
+  });
+}
+function judge(L, t, r){
+  if (!r.ok) return false;
+  let got = r.out === '__undef__' ? undefined : JSON.parse(r.out);
+  let exp = t.expect;
+  if (L.unordered && Array.isArray(got) && Array.isArray(exp)){ got = [...got].sort((a,b)=>a-b); exp = [...exp].sort((a,b)=>a-b); }
+  r.got = r.out === '__undef__' ? undefined : JSON.parse(r.out);
+  return JSON.stringify(got) === JSON.stringify(exp);
+}
+
+/* ---------- LOG ---------- */
+function resetLog(){ $('log').innerHTML = `<h3>Registro de batalha</h3><p class="empty">Escreva sua função e ataque. O resultado de cada teste aparece aqui. <code>console.log</code> também funciona.</p>`; }
+function renderLog(res, passes){
+  let h = `<h3>Registro de batalha · ${passes.filter(Boolean).length}/${cur.tests.length} golpes</h3>`;
+  if (res.compileError){ h += `<div class="err">✗ O feitiço não compilou\n${esc(res.compileError)}</div>`; }
+  else {
+    cur.tests.forEach((t, i) => {
+      const r = res.results[i] || {skipped:true}; const ok = passes[i];
+      let det = '';
+      if (!ok){
+        if (r.timeout) det = `<span class="bad">Tempo esgotado (2,5 s). Loop infinito ou solução lenta demais?</span>`;
+        else if (r.skipped) det = 'não executado';
+        else if (r.error) det = `<span class="bad">Erro: ${esc(r.error)}</span>`;
+        else det = `esperado ${esc(fmt(t.expect))}\nrecebido <span class="bad">${esc(fmt(r.got))}</span>`;
+      }
+      h += `<div class="trow ${ok ? 'pass' : 'fail'}"><span class="ic">${ok ? '✓' : '✗'}</span>
+        <div style="min-width:0"><div class="call">${esc(callStr(t))}${ok ? ` → ${esc(fmt(t.expect))}` : ''}</div>${det ? `<div class="det">${det}</div>` : ''}</div>
+        <span class="ms">${r.ms != null ? r.ms.toFixed(r.ms < 10 ? 2 : 0) + ' ms' : ''}</span></div>`;
+    });
+  }
+  if (res.logs && res.logs.length) h += `<div class="logs">${esc(res.logs.join('\n'))}</div>`;
+  $('log').innerHTML = h;
+}
+
+/* ---------- BATTLE ---------- */
+async function attack(){
+  if (busy || !cur) return;
+  busy = true; $('attackBtn').disabled = true;
+  const res = await runTests(ed.value, cur);
+  const passes = cur.tests.map((t, i) => res.results[i] ? judge(cur, t, res.results[i]) : false);
+  renderLog(res, passes);
+  if (res.compileError){
+    floatText('?!', S.monX(), 30, '#ffd36b');
+    busy = false; $('attackBtn').disabled = false; return;
+  }
+  for (let i = 0; i < passes.length; i++){
+    await sleep(RM ? 120 : 330);
+    if (passes[i]) heroStrike(); else monStrike(res.results[i]);
+  }
+  await sleep(400);
+  if (passes.every(Boolean)){
+    killMonster();
+    await sleep(900);
+    win();
+  } else {
+    hearts--; hits++; renderHUD();
+    floatText('-♥', 46, 34, '#ec5d50');
+    await sleep(500);
+    if (hearts <= 0){ lose(); }
+    else { S.mon.hp = S.mon.max; floatText('+HP', S.monX(), 30, '#74d17f'); }
+  }
+  busy = false; $('attackBtn').disabled = false;
+}
+$('attackBtn').onclick = attack;
+
+function win(){
+  const st = Math.max(1, 3 - hintsUsed - (hits > 0 ? 1 : 0));
+  prog.cleared[cur.id] = Math.max(prog.cleared[cur.id] || 0, st); save(); renderHUD();
+  showSolution(st);
+}
+function showSolution(st){
+  const next = LEVELS[cur.index + 1];
+  const won = st !== null;
+  openModal(`
+    <h2>${won ? (cur.boss ? 'Dragão derrotado!' : 'Sala limpa!') : 'Grimório aberto'}</h2>
+    ${won ? `<div class="bigstars">${starsHTML(st)}</div>` : `<p style="color:var(--muted)">A sala conta como limpa, sem estrelas. Volte depois para conquistá-las.</p>`}
+    <p class="label">PADRÃO · ${esc(cur.pattern.toUpperCase())}</p>
+    <p>${cur.lesson}</p>
+    <div class="cx"><span>Tempo ${esc(cur.time)}</span><span>Espaço ${esc(cur.space)}</span></div>
+    <p class="label">SOLUÇÃO DE REFERÊNCIA</p>
+    <pre>${esc(cur.solution)}</pre>
+    <div class="row">
+      ${next ? `<button class="btn primary" data-act="next">Próxima sala ▸</button>` : `<button class="btn primary" data-act="map">Ver o mapa completo</button>`}
+      ${won ? '' : `<button class="btn" data-act="stay">Tentar eu mesmo</button>`}
+      ${next ? `<button class="btn" data-act="map">Mapa</button>` : ''}
+    </div>`);
+}
+function lose(){
+  openModal(`
+    <h2 class="lose">Você caiu</h2>
+    <p>O ${esc(cur.monster)} venceu esta rodada. Seu código continua no editor.</p>
+    ${hintsUsed < cur.hints.length ? `<p style="color:var(--muted)">Um pergaminho de dica pode ajudar.</p>` : ''}
+    <div class="row"><button class="btn primary" data-act="revive">Levantar e tentar de novo</button><button class="btn" data-act="map">Mapa</button></div>`);
+}
+const modal = $('modal');
+function openModal(h){ modal.innerHTML = `<div class="sheet pix" role="dialog" aria-modal="true">${h}</div>`; modal.hidden = false; const b = modal.querySelector('.btn'); b && b.focus(); }
+function closeModal(){ modal.hidden = true; modal.innerHTML = ''; }
+modal.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const act = a.dataset.act;
+  if (act === 'next'){ closeModal(); enterRoom(cur.index + 1); }
+  else if (act === 'map') toMap();
+  else if (act === 'stay'){ closeModal(); }
+  else if (act === 'revive'){ closeModal(); hearts = MAXH; renderHUD(); resetScene(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden && modal.querySelector('[data-act="stay"],[data-act="revive"]')) closeModal(); });
+
+/* ---------- SCENE ---------- */
+const W = 192, H = 108;
+const cv = $('scene'), ctx = cv.getContext('2d');
+const bg = document.createElement('canvas'); bg.width = W; bg.height = H;
+(() => {
+  const b = bg.getContext('2d'); let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  b.fillStyle = '#100c18'; b.fillRect(0, 0, W, 74);
+  for (let row = 0; row < 13; row++){ const y = row * 6, off = (row % 2) * 6;
+    for (let x = -off; x < W; x += 12){ const v = rnd(); b.fillStyle = v < .12 ? '#342b4d' : v < .3 ? '#1c1729' : '#272038'; b.fillRect(x + 1, y + 1, 10, 4);
+      if (v > .93){ b.fillStyle = '#3a6b45'; b.fillRect(x + 2 + ((rnd()*6)|0), y + 4, 2, 1); } } }
+  // arch behind monster
+  b.fillStyle = '#0a0710'; b.fillRect(122, 26, 46, 48); b.fillRect(126, 22, 38, 4); b.fillRect(132, 19, 26, 3);
+  b.fillStyle = '#3d3459'; for (let x = 120; x < 170; x += 4) { b.fillRect(x, 74 - 1, 3, 1); }
+  // floor
+  b.fillStyle = '#1a1524'; b.fillRect(0, 74, W, H - 74);
+  for (let row = 0; row < 4; row++){ const y = 75 + row * 9, off = (row % 2) * 8;
+    for (let x = -off; x < W; x += 16){ const v = rnd(); b.fillStyle = v < .2 ? '#2a2338' : '#221c2f'; b.fillRect(x + 1, y, 14, 8); } }
+  b.fillStyle = '#3d3459'; b.fillRect(0, 74, W, 1);
+  // torch brackets
+  [[14, 34], [176, 34]].forEach(([x, y]) => { b.fillStyle = '#4a3b2c'; b.fillRect(x - 1, y, 4, 8); b.fillStyle = '#6b5640'; b.fillRect(x - 2, y, 6, 2); });
+})();
+
+const S = {
+  hero:{at:0, hitAt:0, jumpAt:0},
+  mon:{at:0, hitAt:0, hp:0, max:0, deadAt:0},
+  floats:[], parts:[], shakeAt:0, slashAt:0,
+  monScale(){ return cur && cur.boss ? 3 : 2; },
+  monX(){ return cur && cur.boss ? 122 : 130; }
+};
+function resetScene(){ S.mon.hp = S.mon.max = cur.tests.length; S.mon.deadAt = 0; S.mon.at = S.mon.hitAt = 0; S.hero.at = S.hero.hitAt = S.hero.jumpAt = 0; S.floats = []; S.parts = []; }
+function floatText(text, x, y, color){ S.floats.push({text, x, y, color, at:performance.now()}); }
+function heroStrike(){ const n = performance.now(); S.hero.at = n; setTimeout(() => { S.mon.hitAt = performance.now(); S.slashAt = performance.now(); S.mon.hp = Math.max(0, S.mon.hp - 1); floatText('-1', S.monX() + 12, 32, '#ffd36b'); }, RM ? 0 : 130); }
+function monStrike(r){ const n = performance.now(); S.mon.at = n; setTimeout(() => { S.hero.hitAt = performance.now(); S.shakeAt = performance.now(); floatText(r && r.timeout ? 'zzz' : 'X', 40, 38, '#ec5d50'); }, RM ? 0 : 130); }
+function killMonster(){
+  S.mon.deadAt = performance.now(); S.hero.jumpAt = performance.now();
+  const s = S.monScale(), x0 = S.monX(), y0 = 79 - 16 * s, cols = Object.values(cur.pal);
+  for (let i = 0; i < (RM ? 0 : 46); i++) S.parts.push({x:x0 + Math.random()*16*s, y:y0 + Math.random()*16*s, vx:(Math.random()-.5)*60, vy:-Math.random()*70-10, c:cols[(Math.random()*cols.length)|0], at:S.mon.deadAt});
+}
+const tw = (now, at, d) => { if (!at) return 0; const p = (now - at) / d; return p > 0 && p < 1 ? p : 0; };
+function torch(now, x, y){
+  const g = ctx.createRadialGradient(x + 1, y - 3, 1, x + 1, y - 3, 26);
+  g.addColorStop(0, 'rgba(240,162,59,.22)'); g.addColorStop(1, 'rgba(240,162,59,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - 26, y - 30, 54, 54);
+  const f = RM ? 0 : Math.floor(now / 110);
+  const h = 4 + ((f * 7 + x) % 3);
+  ctx.fillStyle = '#ec5d50'; ctx.fillRect(x - 1, y - h, 4, h);
+  ctx.fillStyle = '#f0a23b'; ctx.fillRect(x, y - h + 1, 2, h - 1);
+  ctx.fillStyle = '#ffe28a'; ctx.fillRect(x, y - 2, 2, 2);
+  if ((f + x) % 4 === 0){ ctx.fillStyle = '#f0a23b'; ctx.fillRect(x + ((f % 3) - 1), y - h - 2, 1, 1); }
+}
+function shadow(cx, w){ ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(cx - w, 79, w * 2, 2); ctx.fillRect(cx - w + 3, 81, w * 2 - 6, 1); }
+function pixText(t, x, y, color){
+  ctx.font = '8px Silkscreen, monospace'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#000'; ctx.fillText(t, x + 1, y + 1); ctx.fillStyle = color; ctx.fillText(t, x, y);
+}
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (cur && !$('battleView').hidden){
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false;
+    let sx = 0, sy = 0;
+    if (!RM && tw(now, S.shakeAt, 220)){ sx = ((Math.random() * 5) | 0) - 2; sy = ((Math.random() * 3) | 0) - 1; }
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    ctx.translate(sx, sy);
+    ctx.drawImage(bg, 0, 0);
+    torch(now, 14, 34); torch(now, 176, 34);
+
+    // hero
+    const hp = tw(now, S.hero.at, 280), hdx = hp ? Math.round(Math.sin(hp * Math.PI) * 30) : 0;
+    const jp = tw(now, S.hero.jumpAt, 600), jump = jp ? Math.round(Math.sin(jp * Math.PI) * 10) : 0;
+    const bob = RM ? 0 : (Math.sin(now / 340) > 0 ? 0 : 1);
+    const hx = 30 + hdx;
+    shadow(hx + 14, 11);
+    drawSprite(ctx, SPR.hero, HERO_PAL, hx, 47 + bob - jump, 2, false, tw(now, S.hero.hitAt, 200) ? '#ffffff' : null);
+
+    // monster
+    const s = S.monScale(), mx0 = S.monX(), my = 79 - 16 * s;
+    const dp = tw(now, S.mon.deadAt, 700), dead = S.mon.deadAt && !dp;
+    if (!dead){
+      const mp = tw(now, S.mon.at, 280), mdx = mp ? -Math.round(Math.sin(mp * Math.PI) * 30) : 0;
+      const mbob = RM ? 0 : (Math.sin(now / 260 + 1) > 0 ? 0 : 1);
+      ctx.globalAlpha = dp ? 1 - dp : 1;
+      shadow(mx0 + 8 * s + mdx, 6 * s);
+      const flash = tw(now, S.mon.hitAt, 160) || (dp && Math.floor(now / 60) % 2);
+      drawSprite(ctx, SPR[cur.sprite], cur.pal, mx0 + mdx, my + mbob + (dp ? Math.round(dp * 6) : 0), s, cur.flip, flash ? '#ffffff' : null);
+      ctx.globalAlpha = 1;
+      // HP bar
+      if (!S.mon.deadAt){
+        const seg = 5, gap = 1, bw = S.mon.max * (seg + gap) - gap, bx = Math.round(mx0 + 8 * s - bw / 2), by = my - 7;
+        ctx.fillStyle = '#000'; ctx.fillRect(bx - 1, by - 1, bw + 2, 5);
+        for (let i = 0; i < S.mon.max; i++){ ctx.fillStyle = i < S.mon.hp ? '#ec5d50' : '#3d3459'; ctx.fillRect(bx + i * (seg + gap), by, seg, 3); }
+      }
+    }
+    // slash
+    const sp = tw(now, S.slashAt, 150);
+    if (sp){ const cx = mx0 + 8 * s, cy = my + 8 * s; ctx.fillStyle = '#ffffff';
+      for (let i = -10; i <= 10; i += 2){ if (Math.abs(i) / 10 < sp + .3) ctx.fillRect(cx + i, cy - i, 2, 2); } }
+    // particles
+    S.parts = S.parts.filter(p => now - p.at < 1200);
+    S.parts.forEach(p => { p.vy += 160 * dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.y > 80){ p.y = 80; p.vy *= -.3; p.vx *= .6; }
+      ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2); });
+    // floating text
+    S.floats = S.floats.filter(f => now - f.at < 900);
+    S.floats.forEach(f => { const p = (now - f.at) / 900; ctx.globalAlpha = 1 - p * p; pixText(f.text, f.x, Math.round(f.y - p * 14), f.color); ctx.globalAlpha = 1; });
+    if (S.mon.deadAt && !dp){ pixText('VITÓRIA', 96, 18, '#f0a23b'); }
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+renderMap(); renderHUD();
+</script>
+</body>
+</html>
