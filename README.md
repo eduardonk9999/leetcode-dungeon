@@ -1,140 +1,271 @@
-# Masmorra do Algoritmo
+<p align="center">
+  <img src="docs/banner.png" alt="Herói pixel art de espada em punho diante de uma fila de monstros: slime, morcego, esqueleto, fantasma, mímico, golem, aranha, serpente, olho e um dragão chefe" width="100%">
+</p>
 
-Jogo de LeetCode em pixel art. São **64 salas em 10 andares**: cada andar treina um padrão de entrevista e termina num chefe. Você escreve a função em JavaScript e ataca: cada teste que passa é um golpe no monstro, cada teste que falha custa um coração.
+<h1 align="center">Masmorra do Algoritmo</h1>
 
-## Como rodar
+<p align="center">
+  <b>64 LeetCodes clássicos de entrevista viraram um dungeon crawler em pixel art.</b><br>
+  Escreva a função em JavaScript, ataque o monstro, derrube o chefe e desça mais um andar.
+</p>
 
-Não tem build nem dependências. Sirva a pasta com qualquer servidor estático:
+<p align="center">
+  <a href="https://eduardonk9999.github.io/leetcode-dungeon/"><img src="https://img.shields.io/badge/▶_jogar-no_navegador-f0a23b?style=for-the-badge&labelColor=14111d" alt="Jogar no navegador"></a>
+  <img src="https://img.shields.io/badge/salas-64-3d3459?style=for-the-badge&labelColor=14111d" alt="64 salas">
+  <img src="https://img.shields.io/badge/andares-10-3d3459?style=for-the-badge&labelColor=14111d" alt="10 andares">
+  <img src="https://img.shields.io/badge/dependências-zero-74d17f?style=for-the-badge&labelColor=14111d" alt="zero dependências">
+</p>
+
+<p align="center">
+  🟢 15 Easy &nbsp;·&nbsp; 🟡 44 Medium &nbsp;·&nbsp; 🔴 5 Hard
+</p>
+
+---
+
+## ⚔ Como se joga
+
+<p align="center"><img src="docs/combate.png" alt="Combate contra o Dragão da Janela Deslizante: o editor mostra uma solução com bug e o registro de batalha marca 6 de 7 golpes, falhando no caso abba" width="100%"></p>
+
+1. **Entre numa sala.** Cada uma guarda um problema famoso de entrevista, com enunciado em português e dois exemplos.
+2. **Escreva a função** no editor, do jeito que você escreveria no LeetCode. `console.log` funciona.
+3. **Ataque** (`Ctrl + Enter`). Cada teste que passa é um golpe no monstro. Se algum falhar, ele contra-ataca e você perde um ♥.
+4. **Limpe a sala** e veja a solução de referência, a complexidade e a lição por trás do padrão.
+
+| | |
+|---|---|
+| ★★★ | limpar a sala sem dicas e sem levar dano |
+| 📜 Pergaminho | mostra uma dica e custa 1 ★ |
+| ⏱ Teste de resistência | entradas de 100 mil itens reprovam a solução O(n²) ou a recursão sem memória |
+| 👑 Chefe | a última sala de cada andar, um degrau acima das outras |
+| 🔓 Andar 1 | é o treino: vencer o chefe dele abre todos os outros andares |
+
+## 🧭 Modo guiado: do problema ao código
+
+<table>
+<tr>
+<td width="48%"><img src="docs/guiado.png" alt="Modo guiado do Maximum Depth of Binary Tree: resolução à mão, plano em frases curtas e o código de cada passo"></td>
+<td>
+
+Travar na tela em branco é o problema de quase todo mundo que começa. Cada sala tem um caminho em três passos:
+
+1. **Resolver o exemplo à mão**, como uma pessoa faria.
+2. **Escrever o que você fez em frases curtas.** Cada frase vira uma ferramenta que você já conhece: `for`, `if`, objeto, recursão…
+3. **Colar o plano no editor** como comentários e escrever o código embaixo de cada um.
+
+O código de cada passo fica escondido até você pedir. Juntos, os passos formam a solução completa, e o validador garante que ela passa em todos os testes.
+
+</td>
+</tr>
+</table>
+
+## 🗺 Os andares
+
+<p align="center"><img src="docs/mapa.png" alt="Mapa do jogo com o Andar 1, O Saguão, completo e as estrelas de cada sala" width="100%"></p>
+
+| Andar | Nome | Padrão | Salas | Chefe |
+|:---:|---|---|:---:|---|
+| 01 | **O Saguão** | Fundamentos | 10 | Dragão da Janela Deslizante · *Longest Substring Without Repeating Characters* |
+| 02 | **A Biblioteca Proibida** | Arrays & Hashing | 5 | Basilisco da Sequência Eterna · *Longest Consecutive Sequence* |
+| 03 | **As Minas Gêmeas** | Dois Ponteiros & Janela Deslizante | 5 | Olho Abissal da Fresta · *Minimum Window Substring* |
+| 04 | **A Torre do Eco** | Pilha & Busca Binária | 5 | Colosso dos Mil Pilares · *Largest Rectangle in Histogram* |
+| 05 | **As Correntes** | Linked List | 6 | Aracne, Tecelã das Correntes · *Merge k Sorted Lists* |
+| 06 | **O Bosque Invertido** | Árvores | 8 | Dragão Espinho-Negro · *Binary Tree Maximum Path Sum* |
+| 07 | **O Poço dos Ecos** | Heap & Backtracking | 6 | Dragão Soletrador do Abismo · *Word Search* |
+| 08 | **As Cavernas Conectadas** | Grafos | 5 | Aranha-Rainha das Palavras · *Word Ladder* |
+| 09 | **A Cripta da Memória** | Programação Dinâmica | 8 | Dracolich Reescritor · *Edit Distance* |
+| 10 | **O Salão dos Intervalos** | Intervalos & Greedy | 6 | Titã do Último Portão · *Jump Game II* |
+
+A lista completa com o link de cada problema:
+
+<details>
+<summary><b>Andar 01 · O Saguão</b> · Fundamentos</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [1](https://leetcode.com/problems/two-sum/) | Two Sum | 🟢 Easy | Hash Map | Slime Indexador |
+| [217](https://leetcode.com/problems/contains-duplicate/) | Contains Duplicate | 🟢 Easy | Set | Gosma Repetida |
+| [242](https://leetcode.com/problems/valid-anagram/) | Valid Anagram | 🟢 Easy | Contagem | Morcego Embaralhado |
+| [125](https://leetcode.com/problems/valid-palindrome/) | Valid Palindrome | 🟢 Easy | Dois Ponteiros | Morcego Espelhado |
+| [20](https://leetcode.com/problems/valid-parentheses/) | Valid Parentheses | 🟢 Easy | Pilha | Esqueleto Desbalanceado |
+| [704](https://leetcode.com/problems/binary-search/) | Binary Search | 🟢 Easy | Busca Binária | Fantasma Bissetor |
+| [121](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/) | Best Time to Buy and Sell Stock | 🟢 Easy | Greedy | Esqueleto Mercador |
+| [70](https://leetcode.com/problems/climbing-stairs/) | Climbing Stairs | 🟢 Easy | Prog. Dinâmica | Espectro da Escadaria |
+| [53](https://leetcode.com/problems/maximum-subarray/) | Maximum Subarray | 🟡 Medium | Kadane | Magma de Kadane |
+| [3](https://leetcode.com/problems/longest-substring-without-repeating-characters/) | **Longest Substring Without Repeating Characters 👑** | 🟡 Medium | Janela Deslizante | Dragão da Janela Deslizante |
+
+</details>
+
+<details>
+<summary><b>Andar 02 · A Biblioteca Proibida</b> · Arrays & Hashing</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [49](https://leetcode.com/problems/group-anagrams/) | Group Anagrams | 🟡 Medium | Hash Map | Espectro dos Anagramas |
+| [347](https://leetcode.com/problems/top-k-frequent-elements/) | Top K Frequent Elements | 🟡 Medium | Contagem | Mímico Colecionador |
+| [238](https://leetcode.com/problems/product-of-array-except-self/) | Product of Array Except Self | 🟡 Medium | Prefixo & Sufixo | Golem Multiplicador |
+| [36](https://leetcode.com/problems/valid-sudoku/) | Valid Sudoku | 🟡 Medium | Hash Set | Aranha das Nove Teias |
+| [128](https://leetcode.com/problems/longest-consecutive-sequence/) | **Longest Consecutive Sequence 👑** | 🟡 Medium | Hash Set | Basilisco da Sequência Eterna |
+
+</details>
+
+<details>
+<summary><b>Andar 03 · As Minas Gêmeas</b> · Dois Ponteiros & Janela Deslizante</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [167](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/) | Two Sum II - Input Array Is Sorted | 🟡 Medium | Dois Ponteiros | Morcego das Galerias |
+| [15](https://leetcode.com/problems/3sum/) | 3Sum | 🟡 Medium | Dois Ponteiros | Trinca de Ossos |
+| [11](https://leetcode.com/problems/container-with-most-water/) | Container With Most Water | 🟡 Medium | Dois Ponteiros | Slime da Cisterna |
+| [424](https://leetcode.com/problems/longest-repeating-character-replacement/) | Longest Repeating Character Replacement | 🟡 Medium | Janela Deslizante | Espectro Falsário |
+| [76](https://leetcode.com/problems/minimum-window-substring/) | **Minimum Window Substring 👑** | 🔴 Hard | Janela Deslizante | Olho Abissal da Fresta |
+
+</details>
+
+<details>
+<summary><b>Andar 04 · A Torre do Eco</b> · Pilha & Busca Binária</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [150](https://leetcode.com/problems/evaluate-reverse-polish-notation/) | Evaluate Reverse Polish Notation | 🟡 Medium | Pilha | Mímico Pós-Fixo |
+| [739](https://leetcode.com/problems/daily-temperatures/) | Daily Temperatures | 🟡 Medium | Pilha Monotônica | Morcego da Geada |
+| [153](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/) | Find Minimum in Rotated Sorted Array | 🟡 Medium | Busca Binária | Ouroboros Girado |
+| [33](https://leetcode.com/problems/search-in-rotated-sorted-array/) | Search in Rotated Sorted Array | 🟡 Medium | Busca Binária | Olho do Giro |
+| [84](https://leetcode.com/problems/largest-rectangle-in-histogram/) | **Largest Rectangle in Histogram 👑** | 🔴 Hard | Pilha Monotônica | Colosso dos Mil Pilares |
+
+</details>
+
+<details>
+<summary><b>Andar 05 · As Correntes</b> · Linked List</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [206](https://leetcode.com/problems/reverse-linked-list/) | Reverse Linked List | 🟢 Easy | Ponteiros | Gosma Contramão |
+| [21](https://leetcode.com/problems/merge-two-sorted-lists/) | Merge Two Sorted Lists | 🟢 Easy | Ponteiros | Morcego Costureiro |
+| [141](https://leetcode.com/problems/linked-list-cycle/) | Linked List Cycle | 🟢 Easy | Lebre e Tartaruga | Espectro do Laço Eterno |
+| [19](https://leetcode.com/problems/remove-nth-node-from-end-of-list/) | Remove Nth Node From End of List | 🟡 Medium | Dois Ponteiros | Esqueleto Contador |
+| [2](https://leetcode.com/problems/add-two-numbers/) | Add Two Numbers | 🟡 Medium | Simulação | Mímico Somador |
+| [23](https://leetcode.com/problems/merge-k-sorted-lists/) | **Merge k Sorted Lists 👑** | 🔴 Hard | Dividir e Conquistar | Aracne, Tecelã das Correntes |
+
+</details>
+
+<details>
+<summary><b>Andar 06 · O Bosque Invertido</b> · Árvores</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [226](https://leetcode.com/problems/invert-binary-tree/) | Invert Binary Tree | 🟢 Easy | Recursão | Morcego Pendurado |
+| [104](https://leetcode.com/problems/maximum-depth-of-binary-tree/) | Maximum Depth of Binary Tree | 🟢 Easy | Recursão | Aranha das Raízes |
+| [100](https://leetcode.com/problems/same-tree/) | Same Tree | 🟢 Easy | Recursão | Espectro Gêmeo |
+| [102](https://leetcode.com/problems/binary-tree-level-order-traversal/) | Binary Tree Level Order Traversal | 🟡 Medium | BFS | Olho da Copa |
+| [98](https://leetcode.com/problems/validate-binary-search-tree/) | Validate Binary Search Tree | 🟡 Medium | Recursão | Golem de Casca |
+| [235](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/) | Lowest Common Ancestor of a Binary Search Tree | 🟡 Medium | BST | Serpente do Galho |
+| [230](https://leetcode.com/problems/kth-smallest-element-in-a-bst/) | Kth Smallest Element in a BST | 🟡 Medium | Em Ordem | Mímico do Tronco Oco |
+| [124](https://leetcode.com/problems/binary-tree-maximum-path-sum/) | **Binary Tree Maximum Path Sum 👑** | 🔴 Hard | Recursão | Dragão Espinho-Negro |
+
+</details>
+
+<details>
+<summary><b>Andar 07 · O Poço dos Ecos</b> · Heap & Backtracking</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [215](https://leetcode.com/problems/kth-largest-element-in-an-array/) | Kth Largest Element in an Array | 🟡 Medium | Heap | Golem do Monte |
+| [1046](https://leetcode.com/problems/last-stone-weight/) | Last Stone Weight | 🟢 Easy | Heap | Baú Triturador |
+| [78](https://leetcode.com/problems/subsets/) | Subsets | 🟡 Medium | Backtracking | Morcego do Eco |
+| [46](https://leetcode.com/problems/permutations/) | Permutations | 🟡 Medium | Backtracking | Espectro das Mil Ordens |
+| [39](https://leetcode.com/problems/combination-sum/) | Combination Sum | 🟡 Medium | Backtracking | Aranha Somadora |
+| [79](https://leetcode.com/problems/word-search/) | **Word Search 👑** | 🟡 Medium | Backtracking | Dragão Soletrador do Abismo |
+
+</details>
+
+<details>
+<summary><b>Andar 08 · As Cavernas Conectadas</b> · Grafos</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [200](https://leetcode.com/problems/number-of-islands/) | Number of Islands | 🟡 Medium | DFS | Gosma Arquipélago |
+| [695](https://leetcode.com/problems/max-area-of-island/) | Max Area of Island | 🟡 Medium | DFS | Olho do Cartógrafo |
+| [994](https://leetcode.com/problems/rotting-oranges/) | Rotting Oranges | 🟡 Medium | BFS | Esqueleto do Pomar Podre |
+| [207](https://leetcode.com/problems/course-schedule/) | Course Schedule | 🟡 Medium | Ordenação Topológica | Ouroboros da Grade Curricular |
+| [127](https://leetcode.com/problems/word-ladder/) | **Word Ladder 👑** | 🔴 Hard | BFS | Aranha-Rainha das Palavras |
+
+</details>
+
+<details>
+<summary><b>Andar 09 · A Cripta da Memória</b> · Programação Dinâmica</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [198](https://leetcode.com/problems/house-robber/) | House Robber | 🟡 Medium | Prog. Dinâmica | Esqueleto Saqueador |
+| [213](https://leetcode.com/problems/house-robber-ii/) | House Robber II | 🟡 Medium | Prog. Dinâmica | Espectro do Círculo |
+| [322](https://leetcode.com/problems/coin-change/) | Coin Change | 🟡 Medium | Prog. Dinâmica | Mímico do Troco |
+| [300](https://leetcode.com/problems/longest-increasing-subsequence/) | Longest Increasing Subsequence | 🟡 Medium | Prog. Dinâmica | Serpente Ascendente |
+| [62](https://leetcode.com/problems/unique-paths/) | Unique Paths | 🟡 Medium | Prog. Dinâmica 2D | Aranha das Lajes |
+| [139](https://leetcode.com/problems/word-break/) | Word Break | 🟡 Medium | Prog. Dinâmica | Olho do Grimório |
+| [1143](https://leetcode.com/problems/longest-common-subsequence/) | Longest Common Subsequence | 🟡 Medium | Prog. Dinâmica 2D | Golem das Duas Lápides |
+| [72](https://leetcode.com/problems/edit-distance/) | **Edit Distance 👑** | 🟡 Medium | Prog. Dinâmica 2D | Dracolich Reescritor |
+
+</details>
+
+<details>
+<summary><b>Andar 10 · O Salão dos Intervalos</b> · Intervalos & Greedy</summary>
+
+| # | Problema | Dificuldade | Padrão | Monstro |
+|---:|---|---|---|---|
+| [55](https://leetcode.com/problems/jump-game/) | Jump Game | 🟡 Medium | Greedy | Slime Saltitante |
+| [56](https://leetcode.com/problems/merge-intervals/) | Merge Intervals | 🟡 Medium | Intervalos | Aranha Costureira |
+| [57](https://leetcode.com/problems/insert-interval/) | Insert Interval | 🟡 Medium | Intervalos | Serpente Intrusa |
+| [435](https://leetcode.com/problems/non-overlapping-intervals/) | Non-overlapping Intervals | 🟡 Medium | Greedy | Esqueleto Ceifador |
+| [134](https://leetcode.com/problems/gas-station/) | Gas Station | 🟡 Medium | Greedy | Espectro das Lamparinas |
+| [45](https://leetcode.com/problems/jump-game-ii/) | **Jump Game II 👑** | 🟡 Medium | Greedy | Titã do Último Portão |
+
+</details>
+
+## 👑 Derrube o chefe
+
+<p align="center"><img src="docs/vitoria.png" alt="Tela de vitória contra o chefe do Andar 5: três estrelas, a lição de dividir e conquistar, a complexidade e a solução de referência do Merge k Sorted Lists" width="100%"></p>
+
+Toda vitória abre o grimório: a lição do padrão, onde mais ele aparece em entrevista, a complexidade de tempo e espaço e uma solução de referência para comparar com a sua.
+
+## 🛠 Rodar localmente
+
+Não tem build nem `npm install`. Basta um servidor estático:
 
 ```bash
+git clone https://github.com/eduardonk9999/leetcode-dungeon.git
+cd leetcode-dungeon
 python3 -m http.server 8000
 ```
 
-e abra `http://localhost:8000`. Para publicar, use o GitHub Pages (branch `main`, pasta raiz).
+Depois abra `http://localhost:8000`. O progresso e o código de cada sala ficam salvos no `localStorage` do navegador.
 
-## Regras
-
-- **3 ★**: limpar a sala sem dicas e sem levar dano.
-- **Pergaminho**: mostra uma dica e custa 1 ★.
-- **Teste de resistência**: entradas grandes reprovam a solução ingênua (O(n²), recursão sem memória).
-- **Modo guiado**: resolver o exemplo à mão, escrever o plano em português e colar o plano como comentários no editor.
-- **Andar 1** é o treino: vencer o chefe dele abre todos os outros andares. Dentro de cada andar, as salas abrem em ordem.
-
-## Andares
-
-### Andar 1 · O Saguão (Fundamentos)
-
-- #1 Two Sum · Easy
-- #217 Contains Duplicate · Easy
-- #242 Valid Anagram · Easy
-- #125 Valid Palindrome · Easy
-- #20 Valid Parentheses · Easy
-- #704 Binary Search · Easy
-- #121 Best Time to Buy and Sell Stock · Easy
-- #70 Climbing Stairs · Easy
-- #53 Maximum Subarray · Medium
-- **Chefe:** #3 Longest Substring Without Repeating Characters · Medium
-
-### Andar 2 · A Biblioteca Proibida (Arrays & Hashing)
-
-- #49 Group Anagrams · Medium
-- #347 Top K Frequent Elements · Medium
-- #238 Product of Array Except Self · Medium
-- #36 Valid Sudoku · Medium
-- **Chefe:** #128 Longest Consecutive Sequence · Medium
-
-### Andar 3 · As Minas Gêmeas (Dois Ponteiros & Janela Deslizante)
-
-- #167 Two Sum II - Input Array Is Sorted · Medium
-- #15 3Sum · Medium
-- #11 Container With Most Water · Medium
-- #424 Longest Repeating Character Replacement · Medium
-- **Chefe:** #76 Minimum Window Substring · Hard
-
-### Andar 4 · A Torre do Eco (Pilha & Busca Binária)
-
-- #150 Evaluate Reverse Polish Notation · Medium
-- #739 Daily Temperatures · Medium
-- #153 Find Minimum in Rotated Sorted Array · Medium
-- #33 Search in Rotated Sorted Array · Medium
-- **Chefe:** #84 Largest Rectangle in Histogram · Hard
-
-### Andar 5 · As Correntes (Linked List)
-
-- #206 Reverse Linked List · Easy
-- #21 Merge Two Sorted Lists · Easy
-- #141 Linked List Cycle · Easy
-- #19 Remove Nth Node From End of List · Medium
-- #2 Add Two Numbers · Medium
-- **Chefe:** #23 Merge k Sorted Lists · Hard
-
-### Andar 6 · O Bosque Invertido (Árvores)
-
-- #226 Invert Binary Tree · Easy
-- #104 Maximum Depth of Binary Tree · Easy
-- #100 Same Tree · Easy
-- #102 Binary Tree Level Order Traversal · Medium
-- #98 Validate Binary Search Tree · Medium
-- #235 Lowest Common Ancestor of a Binary Search Tree · Medium
-- #230 Kth Smallest Element in a BST · Medium
-- **Chefe:** #124 Binary Tree Maximum Path Sum · Hard
-
-### Andar 7 · O Poço dos Ecos (Heap & Backtracking)
-
-- #215 Kth Largest Element in an Array · Medium
-- #1046 Last Stone Weight · Easy
-- #78 Subsets · Medium
-- #46 Permutations · Medium
-- #39 Combination Sum · Medium
-- **Chefe:** #79 Word Search · Medium
-
-### Andar 8 · As Cavernas Conectadas (Grafos)
-
-- #200 Number of Islands · Medium
-- #695 Max Area of Island · Medium
-- #994 Rotting Oranges · Medium
-- #207 Course Schedule · Medium
-- **Chefe:** #127 Word Ladder · Hard
-
-### Andar 9 · A Cripta da Memória (Programação Dinâmica)
-
-- #198 House Robber · Medium
-- #213 House Robber II · Medium
-- #322 Coin Change · Medium
-- #300 Longest Increasing Subsequence · Medium
-- #62 Unique Paths · Medium
-- #139 Word Break · Medium
-- #1143 Longest Common Subsequence · Medium
-- **Chefe:** #72 Edit Distance · Medium
-
-### Andar 10 · O Salão dos Intervalos (Intervalos & Greedy)
-
-- #55 Jump Game · Medium
-- #56 Merge Intervals · Medium
-- #57 Insert Interval · Medium
-- #435 Non-overlapping Intervals · Medium
-- #134 Gas Station · Medium
-- **Chefe:** #45 Jump Game II · Medium
-
-## Estrutura
+## 🧱 Por dentro
 
 ```
-index.html        motor do jogo: mapa, combate, editor, cena em canvas, sprites
-js/runtime.js     runtime compartilhado: ListNode/TreeNode, conversão dos testes e comparação
-levels/           um arquivo por andar (addFloor) + README com o formato das salas
-tools/check.mjs   validador dos andares
+index.html         motor do jogo: mapa, combate, editor, cena em canvas e sprites
+js/runtime.js      ListNode/TreeNode, conversão dos testes e comparação das respostas
+levels/            um arquivo por andar + o guia de como escrever salas
+tools/check.mjs    validador: roda solução e modo guiado contra todos os testes
+tools/banner.mjs   gera o banner deste README com os sprites do jogo
 ```
 
-- O código do jogador roda num Web Worker com timeout de 2,5 s, então laço infinito não trava a página.
-- `ListNode(val, next)` e `TreeNode(val, left, right)` existem no editor, como no LeetCode. Listas e árvores aparecem nos testes como arrays (árvores em ordem por nível).
-- O progresso e o código de cada sala ficam no `localStorage` (chave `masmorra-v1`).
+- **Seu código roda isolado** num Web Worker com 2,5 s de limite. Laço infinito não trava a página, só faz o monstro te acertar.
+- **Listas e árvores** aparecem nos testes como arrays, no formato do LeetCode (árvore em ordem por nível, com `null`). `ListNode(val, next)` e `TreeNode(val, left, right)` já existem no editor.
+- **Sprites são texto:** cada monstro é uma matriz 16×16 de letras, e cada sala troca só a paleta.
+- **As respostas são flexíveis** quando a ordem não importa (Subsets, 3Sum, Group Anagrams…).
 
-## Adicionar ou mudar salas
+## 🧪 Criar ou mudar salas
 
-O formato está em [levels/README.md](levels/README.md). Depois de editar, rode:
+O formato de uma sala (enunciado, testes, dicas, solução, modo guiado, monstro e paleta) está em [`levels/README.md`](levels/README.md). Depois de editar, rode o validador (Node 18+):
 
 ```bash
 node tools/check.mjs
 ```
 
-O validador roda a solução de referência e o código montado do modo guiado contra todos os testes, usando o mesmo runtime do jogo, e garante que o código inicial vazio falha. Precisa de Node 18 ou mais novo.
+Ele roda a solução de referência e o código montado do modo guiado contra todos os testes, usando o mesmo runtime do jogo, e reprova a sala se o código inicial vazio passar. Hoje: **64 salas · 0 erros**.
+
+---
+
+<p align="center">
+  <sub>Os problemas pertencem ao <a href="https://leetcode.com">LeetCode</a>; os enunciados aqui foram reescritos em português. Fontes: Silkscreen, Atkinson Hyperlegible e JetBrains Mono.</sub>
+</p>
