@@ -8,7 +8,7 @@ const GH_API = 'https://api.github.com';
 const PROG_FILE = 'progresso.json';
 const sync = (() => { try { return JSON.parse(localStorage.getItem(SYNC_KEY)) || {}; } catch (e){ return {}; } })();
 const saveSync = () => { try { localStorage.setItem(SYNC_KEY, JSON.stringify(sync)); } catch (e){} };
-let syncBusy = false, syncState = sync.repo ? 'idle' : 'off', syncError = '';
+let syncBusy = false, syncState = sync.repo ? 'idle' : 'off', syncError = '', syncErrStatus = 0;
 
 /* ---------- base64 com UTF-8 (acentos e emoji) ---------- */
 const b64encode = s => { const bytes = new TextEncoder().encode(s); let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(bin); };
@@ -27,8 +27,10 @@ async function gh(pathname, opts = {}){
 }
 const repoPath = () => `/repos/${sync.repo}`;
 function explain(e){
+  syncErrStatus = e.status || 0;
   if (e.status === 401) return 'Token inválido ou expirado. Gere um novo e conecte de novo.';
-  if (e.status === 403) return 'O token não tem permissão de escrita. Em Permissions, marque Contents: Read and write.';
+  if (e.status === 403 && /not accessible|permission/i.test(e.message)) return 'O token só pode ler o repositório. No GitHub, abra o token e, em Repository permissions → Contents, troque Read-only por Read and write e tente de novo.';
+  if (e.status === 403) return `O GitHub recusou a escrita (403: ${e.message}). Confira se o token tem Contents: Read and write nesse repositório.`;
   if (e.status === 404) return 'Repositório não encontrado, ou o token não tem acesso a ele (confira Repository access).';
   if (e instanceof TypeError) return 'Sem conexão com o GitHub agora. O progresso fica guardado aqui e sobe na próxima vez.';
   return `O GitHub respondeu: ${e.message}`;
@@ -165,19 +167,25 @@ function setSyncState(s){
   b.className = `btn-ghost sync s-${s}`;
   b.title = s === 'error' ? syncError : sync.last ? `Último commit: ${sync.last.msg}` : 'Salvar o progresso num repositório seu do GitHub';
   if (!modal.hidden && modal.querySelector('#syncPanel')) openSyncPanel();
+  const t = $('today'); if (!t) return;
+  let w = $('syncWarn');
+  if (s === 'error' && sync.repo){
+    if (!w){ w = document.createElement('button'); w.id = 'syncWarn'; w.className = 'syncwarn'; w.onclick = openSyncPanel; t.after(w); }
+    w.innerHTML = `<b>☁ Não consegui salvar no GitHub.</b> ${esc(syncError)} <u>Ver detalhes</u>`;
+  } else if (w) w.remove();
 }
 const ago = iso => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? 'agora' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.round(m / 60)} h` : `há ${Math.round(m / 1440)} d`; };
 function openSyncPanel(){
   const pend = (sync.queue || []).length;
   if (sync.repo && sync.token){
     openModal(`<div id="syncPanel">
-      <h2>Salvo no GitHub</h2>
+      <h2>${syncState === 'error' ? 'Não consegui salvar' : 'Salvo no GitHub'}</h2>
       <p>Conectado a <a href="https://github.com/${esc(sync.repo)}" target="_blank" rel="noopener"><b>${esc(sync.repo)}</b></a>. Cada lição ou batalha vencida vira um commit lá, com o seu código.</p>
       ${sync.last ? `<p class="label">ÚLTIMO COMMIT · ${esc(ago(sync.last.at).toUpperCase())}</p><p><a href="${esc(sync.last.url)}" target="_blank" rel="noopener">${esc(sync.last.msg)}</a></p>` : '<p style="color:var(--muted)">Nenhum commit ainda. Termine uma lição para fazer o primeiro.</p>'}
       ${pend ? `<p>⏳ ${pend} ${pend === 1 ? 'vitória esperando' : 'vitórias esperando'} para subir.</p>` : ''}
       ${syncState === 'error' ? `<p class="syncerr">${esc(syncError)}</p>` : ''}
       <div class="row">
-        <button class="btn primary" data-act="sync-now" ${syncBusy ? 'disabled' : ''}>${syncBusy ? 'Sincronizando…' : 'Sincronizar agora'}</button>
+        <button class="btn primary" data-act="sync-now" ${syncBusy ? 'disabled' : ''}>${syncBusy ? 'Sincronizando…' : syncState === 'error' ? 'Tentar de novo' : 'Sincronizar agora'}</button>
         <button class="btn" data-act="stay">Fechar</button>
         <button class="btn warn" data-act="sync-off">Desconectar</button>
       </div></div>`);
@@ -213,6 +221,7 @@ async function connect(repoIn, tokenIn){
     saveSync();
     syncBusy = false;
     await flush(); // baixa o que já existe, junta com este aparelho e faz o primeiro commit
+    if (syncState === 'error' && (syncErrStatus === 401 || syncErrStatus === 403 || syncErrStatus === 404)){ delete sync.token; saveSync(); setSyncState('error'); }
   } catch (e){
     syncBusy = false; syncError = explain(e);
     delete sync.token; saveSync(); setSyncState('error');
