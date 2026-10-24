@@ -19,6 +19,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+/* código sem ligaduras: <= e != precisam aparecer como o aluno vai digitar */
+code,pre,textarea,.ccode,.piece.tok,.gap,.opt.mono,.line{font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}
 /* hidden precisa vencer o display das classes (.modal é flex) */
 [hidden]{display:none!important}
 html,body{background:var(--bg);color:var(--fg)}
@@ -159,7 +161,113 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .btn.primary{background:var(--torch);color:#1a0f02}
 .btn.primary:hover{background:#ffb954}
 
-@media (prefers-reduced-motion:reduce){.attack{transition:none}}
+/* TRILHA */
+.streak{font-family:var(--f-display);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.streak.lit{color:var(--torch)}
+.today{display:flex;align-items:center;gap:16px;background:var(--panel);padding:16px;margin:22px 4px 6px;flex-wrap:wrap}
+.flame{display:flex;flex-direction:column;align-items:center;justify-content:center;width:68px;height:68px;background:var(--panel-2);color:var(--muted);font-family:var(--f-display);flex:none}
+.flame b{font-family:var(--f-code);font-size:22px;line-height:1;font-weight:600}
+.flame b::before{content:"🔥";display:block;font-size:20px;filter:grayscale(1) brightness(.6);margin-bottom:2px;text-align:center}
+.flame.lit{color:var(--torch)}
+.flame.lit b::before{filter:none}
+.flame span{font-size:10px;margin-top:2px}
+.tmsg{flex:1;min-width:190px}
+.tmsg p{margin:0}
+.tmsg .t1{font-weight:700}
+.tmsg .t2{color:var(--muted);font-size:14px;margin-top:2px}
+.tmsg .t2 b{color:var(--fg)}
+.path{list-style:none;margin:0;padding:38px 0 12px;display:flex;flex-direction:column;align-items:center;gap:30px}
+.node{--zz:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;width:170px;text-align:center;transform:translateX(calc(var(--dx,0px) * var(--zz)))}
+@media (max-width:520px){.node{--zz:.5;width:150px}}
+.node button{width:72px;height:72px;border:0;padding:0;background:var(--panel-2);display:grid;place-items:center;box-shadow:0 6px 0 0 #0b0812;transition:transform .06s}
+.node button:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 0 #0b0812}
+.node button canvas{width:44px;height:44px;image-rendering:pixelated}
+.node.done button{background:#3b2a14;box-shadow:0 6px 0 0 #6e3f12}
+.node.current button{background:var(--torch);box-shadow:0 6px 0 0 var(--torch-deep)}
+.node.k-boss button{width:92px;height:92px}
+.node.k-boss button canvas{width:60px;height:60px}
+.node.locked button{cursor:not-allowed;opacity:.5}
+.node .lbl{font-size:13px;font-weight:700;line-height:1.25}
+.node.locked .lbl{color:var(--muted)}
+.node .kind{display:block;font-family:var(--f-display);font-size:9px;font-weight:400;color:var(--muted);letter-spacing:.06em;margin-bottom:2px}
+.node.k-boss .kind{color:var(--torch)}
+.node .st{color:var(--torch);font-size:13px;letter-spacing:2px}
+.node .st .off{color:var(--line)}
+.bubble{position:absolute;top:-32px;background:var(--fg);color:#1a0f02;font-family:var(--f-display);font-size:11px;padding:3px 8px;white-space:nowrap;animation:bob 1s steps(2) infinite;z-index:1}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-top-color:var(--fg);border-bottom:0}
+@keyframes bob{50%{transform:translateY(-3px)}}
+
+/* LIÇÃO */
+.lesson{max-width:680px;margin:0 auto;padding:14px 0 200px}
+.lbar{display:flex;align-items:center;gap:10px}
+.btn-x{background:none;border:0;color:var(--muted);font-family:var(--f-display);font-size:14px;min-width:44px;min-height:44px;padding:0 6px}
+.btn-x:hover{color:var(--fg)}
+.prog{flex:1;height:14px;background:var(--panel-2);position:relative}
+.prog::after{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--p,0) * 100%);background:var(--ok);box-shadow:inset 0 3px 0 0 rgba(255,255,255,.25);transition:width .3s}
+.lcount{font-family:var(--f-display);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:3ch;text-align:right}
+.ltitle{font-family:var(--f-display);font-size:11px;color:var(--torch);margin:6px 0 10px;letter-spacing:.05em}
+.lstage canvas{aspect-ratio:auto;height:clamp(88px,19vh,150px);object-fit:cover;object-position:50% 78%}
+.card{margin-top:22px}
+.ckind{font-family:var(--f-display);font-size:11px;color:var(--muted);margin:0 0 6px;letter-spacing:.05em}
+.cq{font-size:20px;line-height:1.35;margin:0 0 16px;font-weight:700;text-wrap:pretty}
+.ccode{font-family:var(--f-code);font-size:14px;line-height:1.6;background:var(--code-bg);color:#e9e2f5;padding:12px 14px;margin:0 0 16px;overflow-x:auto;white-space:pre}
+.opts,.lines,.bank{display:flex;flex-direction:column;gap:10px}
+.lines{gap:6px}
+.opt,.line,.piece{text-align:left;background:var(--panel);border:2px solid var(--line);padding:12px 14px;font-size:16px;line-height:1.35;box-shadow:0 4px 0 0 var(--line)}
+.opt.mono{font-family:var(--f-code);font-size:15px}
+.opt:hover,.line:hover,.piece:hover:not(:disabled){border-color:var(--muted)}
+.opt.sel,.line.sel{border-color:var(--torch);background:#2a2215;box-shadow:0 4px 0 0 var(--torch-deep)}
+.opt.right,.line.right{border-color:var(--ok);background:#16301c;box-shadow:0 4px 0 0 #2d6a36}
+.opt.wrong,.line.wrong{border-color:var(--bad);background:#3a1714;box-shadow:0 4px 0 0 #7d2a22}
+.line{display:flex;gap:12px;align-items:baseline;padding:8px 12px;overflow-x:auto;white-space:pre}
+.line .ln{font-family:var(--f-display);font-size:10px;color:var(--muted);flex:none;width:14px}
+.line code{background:none;padding:0;color:#e9e2f5;font-size:14px}
+.slots{list-style:none;margin:0 0 14px;padding:10px;min-height:64px;background:var(--code-bg);display:flex;flex-direction:column;gap:8px;counter-reset:s}
+.slots li{counter-increment:s;display:flex;gap:10px;align-items:center}
+.slots li::before{content:counter(s);font-family:var(--f-display);font-size:11px;color:var(--muted);width:14px;flex:none}
+.slots li.ghost{color:var(--muted);font-size:14px;padding:10px 4px}
+.slots li.ghost::before{content:""}
+.slots .piece{flex:1;border-color:var(--torch);box-shadow:0 4px 0 0 var(--torch-deep)}
+.piece{font-size:15px}
+.piece:disabled{opacity:.2;box-shadow:none;cursor:default}
+.bank:not(.tokens) .piece:disabled{display:none}
+.bank.tokens{flex-direction:row;flex-wrap:wrap}
+.piece.tok{font-family:var(--f-code);padding:8px 12px}
+.blankcode{white-space:pre-wrap;word-break:break-word}
+.gap{display:inline-block;min-width:5ch;min-height:1.5em;vertical-align:middle;border:0;border-bottom:2px dashed var(--torch);background:#2a2215;font-family:var(--f-code);font-size:14px;color:#ffd9a0;padding:0 6px;margin:0 2px}
+.gap.filled{border-bottom-style:solid}
+.codecard{background:var(--code-bg);margin:0 0 12px}
+.codecard .ccode{margin:0;color:var(--muted)}
+.codecard .pre{padding-bottom:2px}
+.codecard .post{padding-top:2px}
+#snip{display:block;width:100%;background:#1b1530;border:0;border-left:3px solid var(--torch);color:#fff;font-family:var(--f-code);font-size:14px;line-height:1.6;padding:6px 12px 6px 11px;resize:none;white-space:pre;overflow-x:auto;tab-size:2}
+@media (max-width:860px){#snip{font-size:16px}}
+@media (max-width:520px){.ccode,.line code{font-size:13px}.cq{font-size:18px}}
+#snip:focus-visible{outline:2px solid var(--torch);outline-offset:0}
+.chint{margin-top:10px;font-size:15px}
+.chint summary{cursor:pointer;font-family:var(--f-display);font-size:11px;color:var(--torch)}
+.chint p{margin:6px 0 0;color:#e6dcf5}
+.checkbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bg);border-top:2px solid var(--line);
+  padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.checkbar.ok{background:#13251a;border-top-color:var(--ok)}
+.checkbar.bad{background:#291412;border-top-color:var(--bad)}
+.checkbar .in{max-width:680px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.fb{flex:1 1 260px;font-size:15px;max-height:38vh;overflow:auto}
+.fb:empty{display:none}
+.fb b{font-family:var(--f-display);font-size:14px;font-weight:700}
+.fb.ok b{color:var(--ok)}
+.fb.bad>b{color:var(--bad)}
+.fb p{margin:4px 0 0}
+.fb .again{color:var(--muted);font-size:13px}
+.fbol{margin:4px 0 0;padding-left:22px}
+.btn.big{padding:14px 22px;font-size:14px;min-width:170px;margin-left:auto}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.checkbar.ok .btn.primary{background:var(--ok)}
+.checkbar.bad .btn.primary{background:var(--bad);color:#fff}
+.linkbtn{background:none;border:0;padding:0;color:var(--torch);text-decoration:underline;font:inherit}
+.streakup{font-size:18px}
+
+@media (prefers-reduced-motion:reduce){.attack,.node button{transition:none}.bubble{animation:none}.prog::after{transition:none}}
 </style>
 </head>
 <body>
@@ -168,6 +276,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <button class="btn-ghost" id="toMap" hidden>◂ Mapa</button>
     <div class="brand">Masmorra do Algoritmo</div>
     <div class="stats">
+      <div class="streak" id="streak" title="Ofensiva: dias seguidos com pelo menos uma lição">🔥 0</div>
       <div class="hearts" id="hearts" aria-label="Vida"></div>
       <div class="stars-total" id="starsTotal">★ 0/30</div>
     </div>
@@ -175,15 +284,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
   <section id="mapView">
     <div class="intro">
-      <h1>Dez andares. Os <span>LeetCodes</span> que mais caem em entrevista.</h1>
-      <p>Cada andar é um padrão (hash map, ponteiros, árvores, grafos, programação dinâmica…) e termina num chefe. Cada sala guarda um problema famoso de entrevista. Escreva a função em JavaScript e ataque: cada teste que passa é um golpe no monstro. Se algum teste falhar, ele contra-ataca e você perde um coração.</p>
+      <h1>Lições de 5 minutos. Os <span>LeetCodes</span> que mais caem em entrevista.</h1>
+      <p>Cada andar é um padrão de entrevista. Cada lição tem cards rápidos (escolher, ordenar, completar, achar o bug) e termina com um trecho de código que roda contra os testes de verdade. No fim do andar, o chefe é o problema completo.</p>
     </div>
-    <div class="rules">
-      <span><b>3 ★</b> limpar sem dicas e sem levar dano</span>
-      <span><b>Pergaminho</b> mostra uma dica e custa 1 ★</span>
-      <span><b>Teste de resistência</b> reprova soluções lentas demais</span>
-      <span><b>Andar 1</b> é o treino: vencer o chefe dele abre todos os outros</span>
-    </div>
+    <div class="today" id="today"></div>
     <div id="rooms"></div>
   </section>
 
@@ -232,6 +336,20 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       </div>
     </div>
   </section>
+
+  <section id="lessonView" hidden>
+    <div class="lesson">
+      <div class="lbar">
+        <button class="btn-x" id="lessonClose" aria-label="Sair da lição">✕</button>
+        <div class="prog" id="lessonProg" aria-hidden="true"></div>
+        <span class="lcount" id="lessonCount" aria-label="Cards acertados">0/0</span>
+      </div>
+      <p class="ltitle" id="lessonTitle"></p>
+      <div class="stage pix lstage"><canvas id="lessonScene" width="192" height="108"></canvas></div>
+      <div class="card" id="card" aria-live="polite"></div>
+    </div>
+    <div class="checkbar" id="checkbar"><div class="in"><div class="fb" id="fb" aria-live="polite"></div><button class="btn primary big" id="checkBtn" disabled>Verificar</button></div></div>
+  </section>
 </div>
 
 <div class="modal" id="modal" hidden></div>
@@ -239,7 +357,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <script>
 /* Registro dos andares: cada arquivo em levels/ chama addFloor({ name, theme, levels, guide }).
    A última sala de cada andar é o chefe. */
-const FLOORS = [], LEVELS = [], GUIDE = {};
+const FLOORS = [], LEVELS = [], GUIDE = {}, LESSONS = {};
+// lessons/*.js: addLessons({ 'id-da-sala': { cards: [...] } })
+const addLessons = o => Object.assign(LESSONS, o);
 const range = n => Array.from({length: n}, (_, i) => i);
 const BIG = range(100000);
 function addFloor(F){
@@ -259,6 +379,7 @@ function addFloor(F){
 <script src="levels/andar-08.js"></script>
 <script src="levels/andar-09.js"></script>
 <script src="levels/andar-10.js"></script>
+<script src="lessons/andar-01.js"></script>
 <script>
 /* ---------- SPRITES ---------- */
 const norm = a => { const r = a.map(s => (s + '................').slice(0, 16)); while (r.length < 16) r.push('................'); return r; };
@@ -456,8 +577,9 @@ const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function renderHUD(){
   $('hearts').innerHTML = Array.from({length:MAXH}, (_, i) => `<span class="${i < hearts ? '' : 'empty'}">${heartSVG}</span>`).join('');
   $('hearts').setAttribute('aria-label', `Vida: ${hearts} de ${MAXH}`);
-  const total = Object.values(prog.cleared).reduce((a, b) => a + b, 0);
-  $('starsTotal').textContent = `★ ${total}/${LEVELS.length * 3}`;
+  $('hearts').hidden = $('battleView').hidden;
+  const t = totals(); $('starsTotal').textContent = `★ ${t.got}/${t.max}`;
+  const s = streakNow(); $('streak').textContent = `🔥 ${s}`; $('streak').classList.toggle('lit', doneToday());
 }
 const starsHTML = n => '★★★'.split('').map((s, i) => `<span class="${i < n ? '' : 'off'}">★</span>`).join('');
 
@@ -470,47 +592,15 @@ function drawSprite(c, rows, pal, x, y, s, flip, tint){
 }
 const floorLevels = f => LEVELS.filter(L => L.floor === f);
 const isCleared = L => prog.cleared[L.id] !== undefined;
-function isUnlocked(L){
-  if (L.inFloor > 0) return isCleared(LEVELS[L.index - 1]);
-  if (L.floor === 0) return true;
-  const f1 = floorLevels(0); return isCleared(f1[f1.length - 1]);
-}
 const diffClass = d => d === 'Medium' ? 'med' : d === 'Hard' ? 'hard' : '';
-function renderMap(){
-  const root = $('rooms'); root.innerHTML = '';
-  FLOORS.forEach((F, f) => {
-    const ls = floorLevels(f);
-    const stars = ls.reduce((a, L) => a + (prog.cleared[L.id] || 0), 0);
-    const head = document.createElement('div'); head.className = 'floor';
-    head.innerHTML = `<h2><small>ANDAR ${String(f+1).padStart(2,'0')}</small>${esc(F.name)}</h2>
-      <span class="fmeta">${esc(F.theme)} · <b>${ls.filter(isCleared).length}/${ls.length}</b> salas · <b>★ ${stars}/${ls.length * 3}</b></span>`;
-    const ol = document.createElement('ol'); ol.className = 'rooms';
-    ls.forEach(L => {
-      const unlocked = isUnlocked(L), st = prog.cleared[L.id];
-      const li = document.createElement('li');
-      li.innerHTML = `<button class="room pix${L.boss ? ' boss' : ''}" ${unlocked ? '' : 'disabled'} data-i="${L.index}">
-        <canvas width="16" height="16"></canvas>
-        <div style="min-width:0">
-          <div class="num">SALA ${String(f+1).padStart(2,'0')}-${String(L.inFloor+1).padStart(2,'0')} · #${L.lc}${L.boss ? ' · CHEFE' : ''}</div>
-          <div class="name">${esc(L.title)}</div>
-          <div class="meta"><span class="chip">${esc(L.pattern)}</span><span class="chip ${diffClass(L.diff)}">${L.diff}</span>
-          ${unlocked ? (st !== undefined ? `<span class="stars">${starsHTML(st)}</span>` : '') : '<span class="lock">▣ trancada</span>'}</div>
-        </div></button>`;
-      if (L.boss) li.style.gridColumn = '1/-1';
-      ol.appendChild(li);
-      const c = li.querySelector('canvas').getContext('2d');
-      drawSprite(c, SPR[L.sprite], L.pal, 0, 0, 1, L.flip, unlocked ? null : '#2b2440');
-    });
-    root.append(head, ol);
-  });
-}
-$('rooms').addEventListener('click', e => { const b = e.target.closest('.room'); if (b && !b.disabled) enterRoom(+b.dataset.i); });
+/* a trilha (renderMap) fica em js/licao.js */
 
 /* ---------- ROOM ---------- */
 function enterRoom(i){
   cur = LEVELS[i];
   hearts = MAXH; hintsUsed = 0; hits = 0;
-  $('mapView').hidden = true; $('battleView').hidden = false; $('toMap').hidden = false;
+  $('mapView').hidden = true; $('lessonView').hidden = true; $('battleView').hidden = false; $('toMap').hidden = false;
+  useCanvas($('scene'));
   $('capRoom').textContent = `Andar ${cur.floor + 1} · Sala ${cur.inFloor + 1} de ${floorLevels(cur.floor).length}`;
   $('capMonster').textContent = cur.monster;
   $('qEyebrow').innerHTML = `<span class="t">${esc(cur.pattern)}</span><span>${cur.diff}</span><span>LeetCode #${cur.lc}</span>`;
@@ -533,7 +623,7 @@ function enterRoom(i){
   scrollTo({top:0, behavior: RM ? 'auto' : 'smooth'});
 }
 function callStr(t){ return t.label ? `${cur.fn}(${t.label})` : `${cur.fn}(${t.args.map(a => fmt(a)).join(', ')})`; }
-function toMap(){ $('battleView').hidden = true; $('mapView').hidden = false; $('toMap').hidden = true; cur = null; hearts = MAXH; renderMap(); renderHUD(); closeModal(); }
+function toMap(){ $('battleView').hidden = true; $('lessonView').hidden = true; $('mapView').hidden = false; $('toMap').hidden = true; cur = null; hearts = MAXH; renderMap(); renderHUD(); closeModal(); }
 $('toMap').onclick = toMap;
 
 $('hintBtn').onclick = () => {
@@ -678,11 +768,11 @@ $('attackBtn').onclick = attack;
 
 function win(){
   const st = Math.max(1, 3 - hintsUsed - (hits > 0 ? 1 : 0));
-  prog.cleared[cur.id] = Math.max(prog.cleared[cur.id] || 0, st); save(); renderHUD();
+  prog.cleared[cur.id] = Math.max(prog.cleared[cur.id] || 0, st); bumpStreak(); save(); renderHUD();
   showSolution(st);
 }
 function showSolution(st){
-  const next = cur.boss ? null : LEVELS[cur.index + 1];
+  const next = cur.boss || hasLessons(cur.floor) ? null : LEVELS[cur.index + 1];
   const won = st !== null;
   openModal(`
     <h2>${won ? (cur.boss ? 'Chefe derrotado!' : 'Sala limpa!') : 'Grimório aberto'}</h2>
@@ -693,7 +783,7 @@ function showSolution(st){
     <p class="label">SOLUÇÃO DE REFERÊNCIA</p>
     <pre>${esc(cur.solution)}</pre>
     <div class="row">
-      ${next ? `<button class="btn primary" data-act="next">Próxima sala ▸</button>` : `<button class="btn primary" data-act="map">Ver o mapa completo</button>`}
+      ${next ? `<button class="btn primary" data-act="next">Próxima sala ▸</button>` : `<button class="btn primary" data-act="map">Voltar à trilha ▸</button>`}
       ${won ? '' : `<button class="btn" data-act="stay">Tentar eu mesmo</button>`}
       ${next ? `<button class="btn" data-act="map">Mapa</button>` : ''}
     </div>`);
@@ -712,6 +802,7 @@ modal.addEventListener('click', e => {
   const a = e.target.closest('[data-act]'); if (!a) return;
   const act = a.dataset.act;
   if (act === 'next'){ closeModal(); enterRoom(cur.index + 1); }
+  else if (act === 'full'){ closeModal(); enterRoom(cur.index); }
   else if (act === 'map') toMap();
   else if (act === 'stay'){ closeModal(); }
   else if (act === 'revive'){ closeModal(); hearts = MAXH; renderHUD(); resetScene(); }
@@ -720,7 +811,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hid
 
 /* ---------- SCENE ---------- */
 const W = 192, H = 108;
-const cv = $('scene'), ctx = cv.getContext('2d');
+// a mesma cena desenha no palco da batalha ou no da lição
+let cv = $('scene'), ctx = cv.getContext('2d');
+function useCanvas(el){ cv = el; ctx = el.getContext('2d'); }
 const bg = document.createElement('canvas'); bg.width = W; bg.height = H;
 (() => {
   const b = bg.getContext('2d'); let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -776,7 +869,7 @@ function pixText(t, x, y, color){
 let last = performance.now();
 function frame(now){
   const dt = Math.min(.05, (now - last) / 1000); last = now;
-  if (cur && !$('battleView').hidden){
+  if (cur && (!$('battleView').hidden || !$('lessonView').hidden)){
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false;
     let sx = 0, sy = 0;
     if (!RM && tw(now, S.shakeAt, 220)){ sx = ((Math.random() * 5) | 0) - 2; sy = ((Math.random() * 3) | 0) - 1; }
@@ -827,8 +920,7 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-
-renderMap(); renderHUD();
 </script>
+<script src="js/licao.js"></script>
 </body>
 </html>

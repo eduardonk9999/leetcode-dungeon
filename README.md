@@ -5,8 +5,8 @@
 <h1 align="center">Masmorra do Algoritmo</h1>
 
 <p align="center">
-  <b>64 LeetCodes clássicos de entrevista viraram um dungeon crawler em pixel art.</b><br>
-  Escreva a função em JavaScript, ataque o monstro, derrube o chefe e desça mais um andar.
+  <b>Treine LeetCode em lições de 5 minutos, estilo Duolingo, numa masmorra em pixel art.</b><br>
+  Uma lição por dia, a ofensiva 🔥 crescendo, e no fim de cada andar um chefe: o problema completo.
 </p>
 
 <p align="center">
@@ -22,22 +22,47 @@
 
 ---
 
-## ⚔ Como se joga
+## 🔥 Uma lição por dia
+
+<table>
+<tr>
+<td width="33%"><img src="docs/trilha.png" alt="Trilha do Andar 1 no celular: ofensiva de 4 dias, botão Começar e as lições Two Sum, Contains Duplicate e Valid Anagram com estrelas"></td>
+<td width="33%"><img src="docs/licao.png" alt="Card de completar código da lição de Binary Search, com fichas como - 1, <= e + 1"></td>
+<td width="33%"><img src="docs/licao-codigo.png" alt="Card final de código da lição de Maximum Subarray respondido certo, com a barra verde de Continuar"></td>
+</tr>
+</table>
+
+Cada sala da masmorra virou uma **lição de uns 5 minutos**, com 7 ou 8 cards que levam da ideia ao código:
+
+| Card | O que treina |
+|---|---|
+| 🧠 **Escolha** | a intuição: o que procurar, que estrutura usar, por que a força bruta não serve |
+| 🧩 **Monte o plano** | colocar os passos da solução na ordem certa |
+| ✏️ **Complete o código** | tocar nas fichas certas para preencher as lacunas |
+| 🔮 **Qual a saída?** | rodar o algoritmo de cabeça, num caso que pega quem entendeu errado |
+| 🐛 **Ache o bug** | o erro clássico que todo mundo comete nesse problema |
+| ⌨️ **Escreva o código** | 1 a 3 linhas dentro da solução, rodando contra os testes de verdade |
+
+Cada acerto é um golpe no monstro. Errou? O card volta no fim da lição até você acertar, como no Duolingo. Faça uma lição por dia para manter a **ofensiva 🔥**.
+
+## ⚔ O chefe: o problema completo
 
 <p align="center"><img src="docs/combate.png" alt="Combate contra o Dragão da Janela Deslizante: o editor mostra uma solução com bug e o registro de batalha marca 6 de 7 golpes, falhando no caso abba" width="100%"></p>
 
-1. **Entre numa sala.** Cada uma guarda um problema famoso de entrevista, com enunciado em português e dois exemplos.
-2. **Escreva a função** no editor, do jeito que você escreveria no LeetCode. `console.log` funciona.
-3. **Ataque** (`Ctrl + Enter`). Cada teste que passa é um golpe no monstro. Se algum falhar, ele contra-ataca e você perde um ♥.
-4. **Limpe a sala** e veja a solução de referência, a complexidade e a lição por trás do padrão.
+No fim de cada andar, o chefe é o problema inteiro, como no LeetCode. Você também pode enfrentar o problema completo de qualquer sala ao terminar a lição.
+
+1. **Escreva a função** no editor. `console.log` funciona.
+2. **Ataque** (`Ctrl + Enter`). Cada teste que passa é um golpe no monstro. Se algum falhar, ele contra-ataca e você perde um ♥.
+3. **Limpe a sala** e veja a solução de referência, a complexidade e a lição por trás do padrão.
 
 | | |
 |---|---|
-| ★★★ | limpar a sala sem dicas e sem levar dano |
-| 📜 Pergaminho | mostra uma dica e custa 1 ★ |
+| ★★★ | lição sem erros, ou batalha sem dicas e sem dano |
+| 📜 Pergaminho | na batalha, mostra uma dica e custa 1 ★ |
 | ⏱ Teste de resistência | entradas de 100 mil itens reprovam a solução O(n²) ou a recursão sem memória |
-| 👑 Chefe | a última sala de cada andar, um degrau acima das outras |
 | 🔓 Andar 1 | é o treino: vencer o chefe dele abre todos os outros andares |
+
+> **Em construção:** o Andar 1 já está todo em lições. Os andares 2 a 10 ainda são jogados como batalhas completas, sala por sala, enquanto as lições deles são escritas.
 
 ## 🧭 Modo guiado: do problema ao código
 
@@ -242,10 +267,12 @@ Depois abra `http://localhost:8000`. O progresso e o código de cada sala ficam 
 ## 🧱 Por dentro
 
 ```
-index.html         motor do jogo: mapa, combate, editor, cena em canvas e sprites
+index.html         motor do jogo: combate, editor, cena em canvas e sprites
+js/licao.js        trilha, lições de 5 minutos, cards e ofensiva
 js/runtime.js      ListNode/TreeNode, conversão dos testes e comparação das respostas
-levels/            um arquivo por andar + o guia de como escrever salas
-tools/check.mjs    validador: roda solução e modo guiado contra todos os testes
+levels/            um arquivo por andar (salas, testes, soluções) + guia de autoria
+lessons/           as lições de cada andar + guia de autoria dos cards
+tools/check.mjs    validador: roda soluções, modo guiado e os cards contra os testes
 tools/banner.mjs   gera o banner deste README com os sprites do jogo
 ```
 
@@ -254,15 +281,15 @@ tools/banner.mjs   gera o banner deste README com os sprites do jogo
 - **Sprites são texto:** cada monstro é uma matriz 16×16 de letras, e cada sala troca só a paleta.
 - **As respostas são flexíveis** quando a ordem não importa (Subsets, 3Sum, Group Anagrams…).
 
-## 🧪 Criar ou mudar salas
+## 🧪 Criar salas e lições
 
-O formato de uma sala (enunciado, testes, dicas, solução, modo guiado, monstro e paleta) está em [`levels/README.md`](levels/README.md). Depois de editar, rode o validador (Node 18+):
+O formato de uma sala (enunciado, testes, dicas, solução, modo guiado, monstro e paleta) está em [`levels/README.md`](levels/README.md), e o dos cards de uma lição em [`lessons/README.md`](lessons/README.md). Depois de editar, rode o validador (Node 18+):
 
 ```bash
 node tools/check.mjs
 ```
 
-Ele roda a solução de referência e o código montado do modo guiado contra todos os testes, usando o mesmo runtime do jogo, e reprova a sala se o código inicial vazio passar. Hoje: **64 salas · 0 erros**.
+Ele roda a solução de referência e o código montado do modo guiado contra todos os testes, usando o mesmo runtime do jogo, e reprova a sala se o código inicial vazio passar. Ele também confere cada card das lições: roda a solução de verdade para checar a resposta dos cards de saída e exige que o card de código passe nos testes com a resposta e falhe vazio. Hoje: **64 salas, 10 lições e 73 cards · 0 erros**.
 
 ---
 
