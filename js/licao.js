@@ -228,6 +228,7 @@ async function check(){
       if (!lesson || lesson.card !== c) return;
       const fails = lesson.L.tests.map((t, i) => [t, res.results[i]]).filter(([t, r]) => !r || !judge(lesson.L, t, r));
       ok = !res.compileError && fails.length === 0;
+      if (ok) lesson.solvedCode = code;
       if (!ok){
         if (res.compileError) extra = `O código não compilou: <code>${esc(res.compileError)}</code>`;
         else { const [t, r] = fails[0]; extra = `${fails.length} de ${lesson.L.tests.length} testes falharam. Em <code>${esc(callStr(t))}</code>: esperado <code>${esc(fmt(t.expect))}</code>, ${r && r.timeout ? 'tempo esgotado' : r && r.error ? `erro <code>${esc(r.error)}</code>` : `recebido <code>${esc(fmt(r && r.got))}</code>`}.`; }
@@ -270,6 +271,7 @@ async function finishLesson(){
   const ls = lesson, L = ls.L, st = ls.errors === 0 ? 3 : ls.errors <= 2 ? 2 : 1;
   prog.lessons[L.id] = Math.max(prog.lessons[L.id] || 0, st);
   const up = bumpStreak(); save(); renderHUD();
+  syncWin({ kind: 'lesson', L, stars: st, code: ls.solvedCode || '' });
   setCheck('…', false);
   killMonster(); await sleep(RM ? 200 : 900);
   const s = streakNow();

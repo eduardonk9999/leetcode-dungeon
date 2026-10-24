@@ -45,6 +45,27 @@ Cada sala da masmorra virou uma **lição de uns 5 minutos**, com 7 ou 8 cards q
 
 Cada acerto é um golpe no monstro. Errou? O card volta no fim da lição até você acertar, como no Duolingo. Faça uma lição por dia para manter a **ofensiva 🔥**.
 
+## ☁ Cada lição vira um commit no seu GitHub
+
+Conecte o jogo a um repositório seu e **cada lição ou batalha vencida vira um commit**, no estilo do LeetHub:
+
+```
+leetcode-dungeon-progresso/
+├── README.md                     ofensiva, estrelas e problemas resolvidos, atualizado sozinho
+├── progresso.json                o progresso que sincroniza entre aparelhos
+└── solucoes/andar-01/two-sum.js  o código que você escreveu, com link do problema e complexidade
+```
+
+```
+✅ Two Sum (lição ★★★) · 🔥 4
+```
+
+- **O treino do dia aparece como quadradinho verde** no seu perfil.
+- **O progresso sincroniza entre celular e computador:** ao abrir, o jogo baixa o que está no repositório e junta com o do aparelho, ficando com a melhor nota de cada sala e a ofensiva mais recente.
+- **Sem internet?** As vitórias ficam numa fila e sobem juntas na próxima vez.
+
+Para conectar, toque em **☁ Salvar no GitHub** no topo do jogo. Você vai precisar de um repositório público e de um [token fine-grained](https://github.com/settings/personal-access-tokens/new) com acesso **só a esse repositório** e permissão **Contents: Read and write**. O token fica só no seu navegador e só é enviado para `api.github.com`.
+
 ## ⚔ O chefe: o problema completo
 
 <p align="center"><img src="docs/combate.png" alt="Combate contra o Dragão da Janela Deslizante: o editor mostra uma solução com bug e o registro de batalha marca 6 de 7 golpes, falhando no caso abba" width="100%"></p>
@@ -269,6 +290,7 @@ Depois abra `http://localhost:8000`. O progresso e o código de cada sala ficam 
 ```
 index.html         motor do jogo: combate, editor, cena em canvas e sprites
 js/licao.js        trilha, lições de 5 minutos, cards e ofensiva
+js/sync.js         salvar no GitHub: commits das vitórias e sincronização entre aparelhos
 js/runtime.js      ListNode/TreeNode, conversão dos testes e comparação das respostas
 levels/            um arquivo por andar (salas, testes, soluções) + guia de autoria
 lessons/           as lições de cada andar + guia de autoria dos cards
