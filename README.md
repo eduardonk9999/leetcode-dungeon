@@ -2,7 +2,7 @@
   <img src="docs/banner.png" alt="Herói pixel art de espada em punho diante de uma fila de monstros: slime, morcego, esqueleto, fantasma, mímico, golem, aranha, serpente, olho e um dragão chefe" width="100%">
 </p>
 
-<h1 align="center">Masmorra do Algoritmo</h1>
+<h1 align="center">Masmorra do Algoritmo!!!</h1>
 
 <p align="center">
   <b>Treine LeetCode em lições de 5 minutos, estilo Duolingo, numa masmorra em pixel art.</b><br>
